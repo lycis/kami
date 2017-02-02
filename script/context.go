@@ -2,20 +2,21 @@ package script
 
 import (
 	"fmt"
-	"os"
-	"io/ioutil"
 	"github.com/robertkrimen/otto"
 )
 
 type ScriptContext struct {
 	libDir string
 	bindings map[string]interface{}
+	cache *ScriptCache
+	instance *Instance
 }
 
-func NewContext(libDir string) ScriptContext {
+func NewContext(libDir string, cache *ScriptCache) ScriptContext {
 	return ScriptContext{
 		libDir: libDir,
 		bindings: make(map[string]interface{}),
+		cache: cache,
 	}
 }
 
@@ -23,8 +24,9 @@ func (ctx *ScriptContext) Bind(vname string, value interface{}) {
 	ctx.bindings[vname] = value
 }
 
-func (ctx *ScriptContext) RunScript(relativePath string) error {
-	content, err := ctx.loadScript(relativePath)
+func (ctx *ScriptContext) RunScript(rpath string) error {
+	absPath := fmt.Sprintf("%s%s", ctx.libDir, rpath)
+	content, err := ctx.cache.loadScript(absPath)
 	if err != nil {
 		return err
 	}
@@ -40,16 +42,13 @@ func (ctx *ScriptContext) RunScript(relativePath string) error {
 		return err
 	}
 
+	ctx.instance = &Instance {
+		vm: vm,
+	}
+
 	return nil
 }
 
-func (ctx ScriptContext) loadScript(rpath string) (string, error) {
-	absPath := fmt.Sprintf("%s%s", ctx.libDir, rpath)
-
-	if _, err := os.Stat(absPath); err != nil {
-		return "", fmt.Errorf("Failed loading script '%s': %s", absPath, err)
-	}
-
-	content, err := ioutil.ReadFile(absPath)
-	return string(content), err
+func (ctx ScriptContext) GetInstance() *Instance {
+	return ctx.instance
 }
