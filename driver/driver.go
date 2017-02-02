@@ -8,6 +8,7 @@ import (
 	"time"
 	"github.com/lycis/kami/entity"
 	"github.com/nu7hatch/gouuid"
+	"github.com/lycis/kami/driver/dfun"
 )
 
 // Driver represents the overall game driver state and driver base functions
@@ -51,6 +52,7 @@ func (d Driver) LibraryDir() string {
 func (d *Driver) Init(file string) {
 	d.Log.Info("Starting game driver.")
 
+	d.Log.Info("Registering dfuns.")
 	d.spawnTimers()
 	d.callInitScript(file)
 
@@ -75,7 +77,8 @@ func (d *Driver) callInitScript(file string) {
 	}
 
 	ctx := script.NewContext(d.libraryDir, &d.scriptCache)
-	ctx.Bind("_driver", d)
+	ctx.Bind("_driver", dfun.NewProvider(d))
+
 	if err := ctx.RunScript(file); err != nil {
 		log.WithError(err).Fatal("Executing the init script failed.")
 		return
@@ -109,4 +112,8 @@ func (driver *Driver) SpawnEntity(rpath string) (*entity.Entity, error) {
 	driver.activeEntities[id.String()] = e
 	driver.Log.WithFields(log.Fields{"$uuid": id, "path": rpath}).Info("Entity spawned.")
 	return e, nil
+}
+
+func (d Driver) Logger() *log.Logger {
+	return d.Log
 }

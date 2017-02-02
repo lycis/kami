@@ -33,6 +33,8 @@ func (ctx *ScriptContext) RunScript(rpath string) error {
 
 	vm := otto.New()
 
+	exposeStaticFunctions(vm)
+
 	for vname, v := range ctx.bindings {
 		vm.Set(vname, v)
 	}
