@@ -43,7 +43,7 @@ func (ctx *ScriptContext) RunScript(rpath string) error {
 	absPath := fmt.Sprintf("%s%s", ctx.libDir, rpath)
 	content, err := ctx.cache.loadScript(absPath)
 	if err != nil {
-		return err
+		return ToError(err)
 	}
 
 	vm := otto.New()
@@ -57,9 +57,14 @@ func (ctx *ScriptContext) RunScript(rpath string) error {
 	bindValues(ctx)
 
 
-	_, err = vm.Run(content)
+	compiledScript, err := vm.Compile(rpath, content)
 	if err != nil {
-		return err
+		return ToError(err)
+	}
+
+	_, err = vm.Run(compiledScript)
+	if err != nil {
+		return ToError(err)
 	}
 
 	return nil
