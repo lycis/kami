@@ -1,6 +1,11 @@
 // The dfun package specifies exposed driver functions. They do directly
 // hook into driver functionality and thus allow you to call driver
 // code from within a script.
+//
+// These functions are available on the "_driver" objects.
+//
+// Example:
+//     var e = _driver.SpawnInstance("/npc/john.js")
 package dfun
 
 import (
