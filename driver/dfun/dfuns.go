@@ -25,8 +25,19 @@ type DfunProvider struct {
 	instance *script.Instance
 }
 
-func (p DfunProvider) Spawn(rpath string) *entity.Entity {
-	entity, err := p.driver.SpawnEntity(rpath)
+// SpawnInstance creates a new, non-exclusive and non-durable entity
+// for the given script. It is a wrapper for Spawn(script, false).
+func (p DfunProvider) SpawnInstance(script string) *entity.Entity {
+	return p.Spawn(script, false)
+}
+
+// Spawn creates a new entity from a given script. The create() method of
+// the script will be invoked on entity creation and should be used to set
+// properties or execute arbitary code on entity creation.
+//
+// To create an exclusive entity set the "exclusive" parameter to true.
+func (p DfunProvider) Spawn(script string, exclusive bool) *entity.Entity {
+	entity, err := p.driver.SpawnEntity(script)
 	if err != nil {
 		p.driver.Logger().Errorf("spawn failed: %s", err)
 		p.instance.RaiseError("spawn failed", err.Error())

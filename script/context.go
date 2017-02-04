@@ -22,6 +22,15 @@ type ScriptContext struct {
 	instance *Instance
 }
 
+func ContextForScript(script, libDir string, cache *ScriptCache) (ScriptContext, error) {
+	ctx := NewContext(libDir, cache)
+	if err := ctx.RunScript(script); err != nil {
+		return ScriptContext{}, err
+	}
+
+	return ctx, nil
+}
+
 // NewContext generates a new ScriptContext for running a script.
 func NewContext(libDir string, cache *ScriptCache) ScriptContext {
 	return ScriptContext{
