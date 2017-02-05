@@ -18,4 +18,5 @@ func main() {
 	mainDriver := driver.New(*libDir)
 	mainDriver.SetLogger(l)
 	mainDriver.Init(*initScript)
+	mainDriver.RunWorld()
 }

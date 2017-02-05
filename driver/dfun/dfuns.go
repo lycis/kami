@@ -36,7 +36,7 @@ func (p DfunProvider) SpawnInstance(script string) *entity.Entity {
 	return p.Spawn(script, false)
 }
 
-// Spawn creates a new entity from a given script. The create() method of
+// Spawn creates a new entity from a given script. The $create() method of
 // the script will be invoked on entity creation and should be used to set
 // properties or execute arbitary code on entity creation.
 //

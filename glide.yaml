@@ -1,0 +1,8 @@
+package: github.com/lycis/kami
+import:
+- package: github.com/Sirupsen/logrus
+  version: ^0.11.0
+- package: github.com/nu7hatch/gouuid
+- package: github.com/ogier/pflag
+  version: ^0.0.1
+- package: github.com/robertkrimen/otto

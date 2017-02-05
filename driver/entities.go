@@ -61,11 +61,18 @@ func (driver *Driver) createEntityInstance(rpath string) (*entity.Entity, error)
 }
 
 func (driver *Driver) registerEntity(e *entity.Entity) {
+	driver.entityListMutex.Lock()
+	defer driver.entityListMutex.Unlock()
 	id := e.GetProp("$uuid").(string)
 	path := e.GetProp("$path").(string)
 
 	driver.activeEntities[id] = e
-	driver.entityInstances[path] = e
+
+	if driver.entityInstances[path] == nil {
+		driver.entityInstances[path] = make([]*entity.Entity, 0)
+	}
+	driver.entityInstances[path] = append(driver.entityInstances[path], e)
+
 	if e.GetProp("$unique").(bool) {
 		driver.Log.WithFields(log.Fields{"path": id}).Info("Exclusive entity spawned.")
 	} else {
