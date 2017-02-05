@@ -27,7 +27,7 @@ func NewProvider(driver DriverInterface) *DfunProvider {
 
 type DfunProvider struct {
 	driver DriverInterface
-	instance *script.Instance
+	instance *script.ScriptContext
 }
 
 // SpawnInstance creates a new, non-exclusive and non-durable entity
@@ -52,6 +52,6 @@ func (p DfunProvider) Spawn(script string, exclusive bool) *entity.Entity {
 	return entity
 }
 
-func (p *DfunProvider) SetScriptInstance(instance *script.Instance) {
+func (p *DfunProvider) SetScriptInstance(instance *script.ScriptContext) {
 	p.instance = instance
 }

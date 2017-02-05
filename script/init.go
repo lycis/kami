@@ -1,5 +1,4 @@
 package script
 
-func init() {
-	eFunProviders = make([]ExposedFunctionProvider, 0)
-}
+import _ "github.com/robertkrimen/otto/underscore"
+

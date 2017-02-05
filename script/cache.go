@@ -11,6 +11,8 @@ import (
 type ScriptCache struct {
 	cache map[string]cacheEntry
 	accessMutex sync.Mutex
+
+	baseDir string
 }
 
 type cacheEntry struct {

@@ -15,8 +15,8 @@ func (driver *Driver) SpawnExcluseive(rpath string) (*entity.Entity, error) {
 		return nil, err
 	}
 
-	e.SetProp("$id", rpath)
-	e.SetProp("$exclusive", true)
+	e.SetProp(entity.P_SYS_ID, rpath)
+	e.SetProp(entity.P_SYS_EXCLUSIVE, true)
 
 	driver.registerEntity(e)
 	return e, nil
@@ -36,8 +36,8 @@ func (driver *Driver) SpawnEntity(rpath string) (*entity.Entity, error) {
 		return nil, err
 	}
 
-	e.SetProp("$uuid", id.String())
-	e.SetProp("$unique", false)
+	e.SetProp(entity.P_SYS_ID, id.String())
+	e.SetProp(entity.P_SYS_EXCLUSIVE, false)
 
 	driver.registerEntity(e)
 	return e, nil
@@ -49,13 +49,12 @@ func (driver *Driver) createEntityInstance(rpath string) (*entity.Entity, error)
 		return nil, err
 	}
 
-	instance := ctx.GetInstance()
-	e, err := entity.NewEntity(instance)
+	e, err := entity.NewEntity(&ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	e.SetProp("$path", rpath)
+	e.SetProp(entity.P_SYS_PATH, rpath)
 
 	return e, nil
 }
@@ -63,8 +62,8 @@ func (driver *Driver) createEntityInstance(rpath string) (*entity.Entity, error)
 func (driver *Driver) registerEntity(e *entity.Entity) {
 	driver.entityListMutex.Lock()
 	defer driver.entityListMutex.Unlock()
-	id := e.GetProp("$uuid").(string)
-	path := e.GetProp("$path").(string)
+	id := e.GetProp(entity.P_SYS_ID).(string)
+	path := e.GetProp(entity.P_SYS_PATH).(string)
 
 	driver.activeEntities[id] = e
 
@@ -73,9 +72,9 @@ func (driver *Driver) registerEntity(e *entity.Entity) {
 	}
 	driver.entityInstances[path] = append(driver.entityInstances[path], e)
 
-	if e.GetProp("$unique").(bool) {
+	if e.GetProp(entity.P_SYS_EXCLUSIVE).(bool) {
 		driver.Log.WithFields(log.Fields{"path": id}).Info("Exclusive entity spawned.")
 	} else {
-		driver.Log.WithFields(log.Fields{"$uuid": id, "path": path}).Info("Entity instance spawned.")
+		driver.Log.WithFields(log.Fields{"uuid": id, "path": path}).Info("Entity instance spawned.")
 	}
 }

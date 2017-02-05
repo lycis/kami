@@ -1,15 +1,15 @@
 package script
 
 import (
-	"fmt"
 	"github.com/robertkrimen/otto"
+	"path/filepath"
 )
 
 // When binding a variable to the script context that implements this
 // interface it will receive the virtual machine instance used for parsing
 // the script on execution.
 type BindValueWithInstance interface {
-	SetScriptInstance(instance *Instance)
+	SetScriptInstance(ctx *ScriptContext)
 }
 
 // ScriptContext provides (duh!) a context for running a script.
@@ -19,7 +19,7 @@ type ScriptContext struct {
 	libDir string
 	bindings map[string]interface{}
 	cache *ScriptCache
-	instance *Instance
+	vm *otto.Otto
 }
 
 func ContextForScript(script, libDir string, cache *ScriptCache) (ScriptContext, error) {
@@ -49,29 +49,25 @@ func (ctx *ScriptContext) Bind(vname string, value interface{}) {
 // RunScrupt executes the script given from the path relative
 // to the drivers library directory.
 func (ctx *ScriptContext) RunScript(rpath string) error {
-	absPath := fmt.Sprintf("%s%s", ctx.libDir, rpath)
-	content, err := ctx.cache.loadScript(absPath)
+	content, err := ctx.LoadScript(rpath)
 	if err != nil {
 		return ToError(err)
 	}
 
-	vm := otto.New()
-
-	ctx.instance = &Instance{
-		vm: vm,
+	if ctx.vm == nil {
+		ctx.vm = otto.New()
 	}
 
-
-	exposeStaticFunctions(vm)
+	exposeStaticFunctions(ctx)
 	bindValues(ctx)
 
 
-	compiledScript, err := vm.Compile(rpath, content)
+	compiledScript, err := ctx.vm.Compile(rpath, content)
 	if err != nil {
 		return ToError(err)
 	}
 
-	_, err = vm.Run(compiledScript)
+	_, err = ctx.vm.Run(compiledScript)
 	if err != nil {
 		return ToError(err)
 	}
@@ -83,15 +79,37 @@ func bindValues(ctx *ScriptContext) {
 	for vname, v := range ctx.bindings {
 		bwi := v.(BindValueWithInstance)
 		if _, ok := v.(BindValueWithInstance); ok {
-			bwi.SetScriptInstance(ctx.instance)
+			bwi.SetScriptInstance(ctx)
 		}
 
-		ctx.instance.vm.Set(vname, v)
+		ctx.vm.Set(vname, v)
 	}
 }
 
-// GetInstance returns the script instance that results
-// from the executed script.
-func (ctx ScriptContext) GetInstance() *Instance {
-	return ctx.instance
+func (ctx ScriptContext) LoadScript(path string) (string, error) {
+	return ctx.cache.loadScript(filepath.Join(ctx.libDir, path))
+}
+
+func (ctx ScriptContext) Call(name string, this interface{}, args ...interface{}) (otto.Value, error) {
+	return ctx.vm.Call(name, this, args...)
+}
+
+func (ctx ScriptContext) GetFunction(name string) (otto.Value, error) {
+	f, err := ctx.vm.Get(name)
+	if err != nil {
+		return otto.UndefinedValue(), ToError(err)
+	}
+	if !f.IsFunction() {
+		return otto.UndefinedValue(), nil
+	}
+
+	return  f, nil
+}
+
+func (ctx ScriptContext) RaiseError(name, message string) {
+	panic(ctx.vm.MakeCustomError(name, message))
+}
+
+func (ctx ScriptContext) Vm() *otto.Otto{
+	return  ctx.vm
 }

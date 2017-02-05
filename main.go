@@ -9,7 +9,7 @@ import (
 
 func main() {
 	libDir := flag.String("lib", "/usr/lib/kami/", "root directory of the game library")
-	initScript := flag.String("init", "init.js", "name of the script that will initialise the library (run on startup)")
+	initScript := flag.String("init", "/sys/init.js", "name of the script that will initialise the library (run on startup)")
 	flag.Parse()
 
 	l := log.New()

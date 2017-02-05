@@ -11,32 +11,20 @@ type Entity struct {
 	properties map[string]interface{}
 	mutex      sync.Mutex
 
-	script *script.Instance
+	script *script.ScriptContext
 }
 
-func NewEntity(instance *script.Instance) (*Entity, error) {
+func NewEntity(ctx *script.ScriptContext) (*Entity, error) {
 	e := &Entity {
 		properties: make(map[string]interface{}),
-		script: instance,
+		script: ctx,
 	}
 
 	_, err := e.script.Call("$create", e)
 	return e, err
 }
 
-func (e *Entity) SetProp(name string, value interface{}) {
-	e.mutex.Lock()
-	defer e.mutex.Unlock()
 
-	e.properties[name] = value
-}
-
-func (e Entity) GetProp(name string) interface{} {
-	e.mutex.Lock()
-	defer e.mutex.Unlock()
-
-	return e.properties[name]
-}
 
 func (e *Entity) Heartbeat() {
 	f, err := e.script.GetFunction("$tick")

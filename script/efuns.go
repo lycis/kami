@@ -4,22 +4,25 @@ import (
 	"github.com/robertkrimen/otto"
 )
 
-type ExposedFunction func(call otto.FunctionCall) otto.Value
-
-type ExposedFunctionProvider interface {
-	ExposedFunctions() map[string]ExposedFunction
+type ExposedFunction interface {
+	Function() func(call otto.FunctionCall) otto.Value
 }
 
-var eFunProviders []ExposedFunctionProvider
+type EFunCreator func(ctx *ScriptContext) ExposedFunction
 
-func RegisterExposedFunctionProvider(p ExposedFunctionProvider) {
-	eFunProviders = append(eFunProviders, p)
+var eFuns map[string]EFunCreator
+
+func ExposeFunction(name string, f EFunCreator)  {
+	if eFuns == nil {
+		eFuns = make(map[string]EFunCreator)
+	}
+
+	eFuns[name] = f
 }
 
-func exposeStaticFunctions(vm *otto.Otto) {
-	for _, provider := range eFunProviders {
-		for name, fp := range provider.ExposedFunctions() {
-			vm.Set(name, fp)
-		}
+func exposeStaticFunctions(ctx *ScriptContext) {
+	for name, f := range eFuns {
+		efun := f(ctx)
+		ctx.Vm().Set(name, efun.Function())
 	}
 }

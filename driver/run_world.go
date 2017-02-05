@@ -11,6 +11,8 @@ func (driver *Driver) RunWorld() {
 		if time.Now().Sub(driver.lastHeartbeat) > time.Second*2 {
 			driver.heartbeat()
 		}
+
+		time.Sleep(time.Millisecond*10)
 	}
 }
 func (driver *Driver) heartbeat() {
