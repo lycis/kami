@@ -10,23 +10,18 @@ package dfun
 
 import (
 	"github.com/lycis/kami/entity"
-	log "github.com/Sirupsen/logrus"
 	"github.com/lycis/kami/script"
+	"github.com/lycis/kami/driver"
 )
 
-type DriverInterface interface {
-	SpawnEntity(rpath string) (*entity.Entity, error)
-	Logger() *log.Logger
-}
-
-func NewProvider(driver DriverInterface) *DfunProvider {
+func NewProvider(driver driver.Driver) *DfunProvider {
 	return &DfunProvider{
 		driver: driver,
 	}
 }
 
 type DfunProvider struct {
-	driver DriverInterface
+	driver driver.Driver
 	instance *script.ScriptContext
 }
 
@@ -42,15 +37,27 @@ func (p DfunProvider) SpawnInstance(script string) *entity.Entity {
 //
 // To create an exclusive entity set the "exclusive" parameter to true.
 func (p DfunProvider) Spawn(script string, exclusive bool) *entity.Entity {
-	entity, err := p.driver.SpawnEntity(script)
+	var e *entity.Entity
+	var err error
+
+	if exclusive {
+		e, err = p.driver.SpawnExclusive(script)
+	} else {
+		e, err = p.driver.SpawnEntity(script)
+	}
+
 	if err != nil {
 		p.driver.Logger().Errorf("spawn failed: %s", err)
 		p.instance.RaiseError("spawn failed", err.Error())
 		return nil
 	}
 
-	return entity
+	return e
 }
+
+/*func (p DfunProvider) FindEntityById(id string) *entity.Entity {
+	return p.driver.GetEnityById(id)
+}*/
 
 func (p *DfunProvider) SetScriptInstance(instance *script.ScriptContext) {
 	p.instance = instance

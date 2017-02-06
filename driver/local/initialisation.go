@@ -1,4 +1,4 @@
-package driver
+package local
 
 import (
 	"time"
@@ -10,7 +10,7 @@ import (
 )
 
 // Init will initialise and start the driver and also game world.
-func (d *Driver) Init(file string) {
+func (d *LocalDriver) Init(file string) {
 	d.Log.Info("Starting game driver.")
 
 	d.Log.Info("Registering dfuns.")
@@ -20,17 +20,17 @@ func (d *Driver) Init(file string) {
 	d.Log.Info("Driver initialised.")
 }
 
-func (driver *Driver) spawnTimers() {
+func (driver *LocalDriver) spawnTimers() {
 	driver.cacheCleanupTimer = time.AfterFunc(time.Minute*5, driver.cleanupCaches)
 	driver.Log.WithField("interval", "5m").Info("Spawned cache cleanup timer.")
 }
 
-func (driver *Driver) cleanupCaches() {
+func (driver *LocalDriver) cleanupCaches() {
 	driver.scriptCache.Cleanup(time.Minute*5)
 	driver.cacheCleanupTimer = time.AfterFunc(time.Minute*5, driver.cleanupCaches)
 }
 
-func (d *Driver) callInitScript(file string) {
+func (d *LocalDriver) callInitScript(file string) {
 	d.Log.WithField("init", fmt.Sprintf("%s%s", d.libraryDir, file)).Info("Loading init script.")
 	if _, err := os.Stat(d.libraryDir); os.IsNotExist(err) {
 		d.Log.WithField("lib", d.libraryDir).Fatal("Game library directory does not exist")

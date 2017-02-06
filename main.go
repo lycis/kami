@@ -3,8 +3,8 @@ package main
 import (
 	flag "github.com/ogier/pflag"
 	log "github.com/Sirupsen/logrus"
-	"github.com/lycis/kami/driver"
 	"os"
+	"github.com/lycis/kami/driver/local"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 	l := log.New()
 	l.Out = os.Stdout
 
-	mainDriver := driver.New(*libDir)
+	mainDriver := local.New(*libDir)
 	mainDriver.SetLogger(l)
 	mainDriver.Init(*initScript)
 	mainDriver.RunWorld()

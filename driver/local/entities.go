@@ -1,4 +1,4 @@
-package driver
+package local
 
 import (
 	"github.com/lycis/kami/entity"
@@ -7,7 +7,7 @@ import (
 	"github.com/lycis/kami/script"
 )
 
-func (driver *Driver) SpawnExcluseive(rpath string) (*entity.Entity, error) {
+func (driver *LocalDriver) SpawnExclusive(rpath string) (*entity.Entity, error) {
 	// TODO check if instances exist
 
 	e, err := driver.createEntityInstance(rpath)
@@ -23,7 +23,7 @@ func (driver *Driver) SpawnExcluseive(rpath string) (*entity.Entity, error) {
 }
 
 // SpawnEntity loads and spawns an entity from the given script path
-func (driver *Driver) SpawnEntity(rpath string) (*entity.Entity, error) {
+func (driver *LocalDriver) SpawnEntity(rpath string) (*entity.Entity, error) {
 	// TODO check if exclusive entity exists
 
 	e, err := driver.createEntityInstance(rpath)
@@ -43,7 +43,7 @@ func (driver *Driver) SpawnEntity(rpath string) (*entity.Entity, error) {
 	return e, nil
 }
 
-func (driver *Driver) createEntityInstance(rpath string) (*entity.Entity, error) {
+func (driver *LocalDriver) createEntityInstance(rpath string) (*entity.Entity, error) {
 	ctx, err := script.ContextForScript(rpath, driver.LibraryDir(), &driver.scriptCache)
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func (driver *Driver) createEntityInstance(rpath string) (*entity.Entity, error)
 	return e, nil
 }
 
-func (driver *Driver) registerEntity(e *entity.Entity) {
+func (driver *LocalDriver) registerEntity(e *entity.Entity) {
 	driver.entityListMutex.Lock()
 	defer driver.entityListMutex.Unlock()
 	id := e.GetProp(entity.P_SYS_ID).(string)

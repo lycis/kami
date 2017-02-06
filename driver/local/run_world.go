@@ -1,11 +1,11 @@
-package driver
+package local
 
 import (
 	"time"
 	log "github.com/Sirupsen/logrus"
 )
 
-func (driver *Driver) RunWorld() {
+func (driver *LocalDriver) RunWorld() {
 	for {
 		// call heartbeat
 		if time.Now().Sub(driver.lastHeartbeat) > time.Second*2 {
@@ -15,7 +15,7 @@ func (driver *Driver) RunWorld() {
 		time.Sleep(time.Millisecond*10)
 	}
 }
-func (driver *Driver) heartbeat() {
+func (driver *LocalDriver) heartbeat() {
 	for path, instances := range driver.entityInstances {
 		log.WithField("path", path).Debug("Calling heartbeat for instance shard.")
 		go func() {
