@@ -54,9 +54,9 @@ func (p DfunProvider) Spawn(script string, exclusive bool) *entity.Entity {
 	return e
 }
 
-/*func (p DfunProvider) FindEntityById(id string) *entity.Entity {
-	return p.driver.GetEnityById(id)
-}*/
+func (p DfunProvider) GetEntityById(id string) *entity.Entity {
+	return p.driver.GetEntityById(id)
+}
 
 func (p *DfunProvider) SetScriptInstance(instance *script.ScriptContext) {
 	p.instance = instance
