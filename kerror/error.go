@@ -1,4 +1,4 @@
-package script
+package kerror
 
 import (
 	"github.com/robertkrimen/otto"

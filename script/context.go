@@ -3,6 +3,7 @@ package script
 import (
 	"github.com/robertkrimen/otto"
 	"path/filepath"
+	"github.com/lycis/kami/kerror"
 )
 
 // When binding a variable to the script context that implements this
@@ -20,10 +21,11 @@ type ScriptContext struct {
 	bindings map[string]interface{}
 	cache *ScriptCache
 	vm *otto.Otto
+	driver DriverAPI
 }
 
-func ContextForScript(script, libDir string, cache *ScriptCache) (ScriptContext, error) {
-	ctx := NewContext(libDir, cache)
+func ContextForScript(driver DriverAPI, script, libDir string, cache *ScriptCache) (ScriptContext, error) {
+	ctx := NewContext(driver, libDir, cache)
 	if err := ctx.RunScript(script); err != nil {
 		return ScriptContext{}, err
 	}
@@ -32,11 +34,12 @@ func ContextForScript(script, libDir string, cache *ScriptCache) (ScriptContext,
 }
 
 // NewContext generates a new ScriptContext for running a script.
-func NewContext(libDir string, cache *ScriptCache) ScriptContext {
+func NewContext(driver DriverAPI, libDir string, cache *ScriptCache) ScriptContext {
 	return ScriptContext{
 		libDir: libDir,
 		bindings: make(map[string]interface{}),
 		cache: cache,
+		driver: driver,
 	}
 }
 
@@ -51,7 +54,7 @@ func (ctx *ScriptContext) Bind(vname string, value interface{}) {
 func (ctx *ScriptContext) RunScript(rpath string) error {
 	content, err := ctx.LoadScript(rpath)
 	if err != nil {
-		return ToError(err)
+		return kerror.ToError(err)
 	}
 
 	if ctx.vm == nil {
@@ -64,12 +67,12 @@ func (ctx *ScriptContext) RunScript(rpath string) error {
 
 	compiledScript, err := ctx.vm.Compile(rpath, content)
 	if err != nil {
-		return ToError(err)
+		return kerror.ToError(err)
 	}
 
 	_, err = ctx.vm.Run(compiledScript)
 	if err != nil {
-		return ToError(err)
+		return kerror.ToError(err)
 	}
 
 	return nil
@@ -97,7 +100,7 @@ func (ctx ScriptContext) Call(name string, this interface{}, args ...interface{}
 func (ctx ScriptContext) GetFunction(name string) (otto.Value, error) {
 	f, err := ctx.vm.Get(name)
 	if err != nil {
-		return otto.UndefinedValue(), ToError(err)
+		return otto.UndefinedValue(), kerror.ToError(err)
 	}
 	if !f.IsFunction() {
 		return otto.UndefinedValue(), nil
@@ -112,4 +115,8 @@ func (ctx ScriptContext) RaiseError(name, message string) {
 
 func (ctx ScriptContext) Vm() *otto.Otto{
 	return  ctx.vm
+}
+
+func (ctx ScriptContext) Driver() DriverAPI {
+	return ctx.driver
 }

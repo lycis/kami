@@ -44,7 +44,7 @@ func (driver *LocalDriver) SpawnEntity(rpath string) (*entity.Entity, error) {
 }
 
 func (driver *LocalDriver) createEntityInstance(rpath string) (*entity.Entity, error) {
-	ctx, err := script.ContextForScript(rpath, driver.LibraryDir(), &driver.scriptCache)
+	ctx, err := script.ContextForScript(driver, rpath, driver.LibraryDir(), &driver.scriptCache)
 	if err != nil {
 		return nil, err
 	}

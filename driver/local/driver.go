@@ -56,3 +56,6 @@ func (d LocalDriver) Logger() *log.Logger {
 	return d.Log
 }
 
+func (d LocalDriver) GetEntityById(id string) *entity.Entity {
+	return d.activeEntities[id]
+}

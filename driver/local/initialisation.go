@@ -37,7 +37,7 @@ func (d *LocalDriver) callInitScript(file string) {
 		return
 	}
 
-	ctx := script.NewContext(d.libraryDir, &d.scriptCache)
+	ctx := script.NewContext(d, d.libraryDir, &d.scriptCache)
 	ctx.Bind("_driver", dfun.NewProvider(d))
 
 	if err := ctx.RunScript(file); err != nil {

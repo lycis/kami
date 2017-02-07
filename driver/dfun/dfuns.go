@@ -11,17 +11,16 @@ package dfun
 import (
 	"github.com/lycis/kami/entity"
 	"github.com/lycis/kami/script"
-	"github.com/lycis/kami/driver"
 )
 
-func NewProvider(driver driver.Driver) *DfunProvider {
+func NewProvider(driver script.DriverAPI) *DfunProvider {
 	return &DfunProvider{
 		driver: driver,
 	}
 }
 
 type DfunProvider struct {
-	driver driver.Driver
+	driver script.DriverAPI
 	instance *script.ScriptContext
 }
 
