@@ -1,15 +1,16 @@
 package script
 
 import (
-	"time"
 	"fmt"
-	"os"
 	"io/ioutil"
+	"os"
+	"strings"
 	"sync"
+	"time"
 )
 
 type ScriptCache struct {
-	cache map[string]cacheEntry
+	cache       map[string]cacheEntry
 	accessMutex sync.Mutex
 
 	baseDir string
@@ -17,7 +18,7 @@ type ScriptCache struct {
 
 type cacheEntry struct {
 	lastHit time.Time
-	value string
+	value   string
 }
 
 func NewCache() ScriptCache {
@@ -30,6 +31,10 @@ func NewCache() ScriptCache {
 func (cache *ScriptCache) loadScript(path string) (string, error) {
 	cache.accessMutex.Lock()
 	defer cache.accessMutex.Unlock()
+
+	if !strings.HasSuffix(path, ".js") {
+		path = fmt.Sprintf("%s.js", path)
+	}
 
 	if v, found := cache.cache[path]; found {
 		v.lastHit = time.Now()
@@ -44,7 +49,7 @@ func (cache *ScriptCache) loadScript(path string) (string, error) {
 	if err == nil {
 		cache.cache[path] = cacheEntry{
 			lastHit: time.Now(),
-			value: string(content),
+			value:   string(content),
 		}
 	}
 	return string(content), err
