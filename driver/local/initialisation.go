@@ -1,19 +1,17 @@
 package local
 
 import (
-	"time"
 	"fmt"
-	"os"
-	"github.com/lycis/kami/script"
-	"github.com/lycis/kami/driver/dfun"
 	log "github.com/Sirupsen/logrus"
+	"github.com/lycis/kami/script"
+	"os"
+	"time"
 )
 
 // Init will initialise and start the driver and also game world.
 func (d *LocalDriver) Init(file string) {
 	d.Log.Info("Starting game driver.")
 
-	d.Log.Info("Registering dfuns.")
 	d.spawnTimers()
 	d.callInitScript(file)
 
@@ -26,7 +24,7 @@ func (driver *LocalDriver) spawnTimers() {
 }
 
 func (driver *LocalDriver) cleanupCaches() {
-	driver.scriptCache.Cleanup(time.Minute*5)
+	driver.scriptCache.Cleanup(time.Minute * 5)
 	driver.cacheCleanupTimer = time.AfterFunc(time.Minute*5, driver.cleanupCaches)
 }
 
@@ -38,11 +36,9 @@ func (d *LocalDriver) callInitScript(file string) {
 	}
 
 	ctx := script.NewContext(d, d.libraryDir, &d.scriptCache)
-	ctx.Bind("_driver", dfun.NewProvider(d))
 
 	if err := ctx.RunScript(file); err != nil {
 		log.WithError(err).Fatal("Executing the init script failed.")
 		return
 	}
 }
-
