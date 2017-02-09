@@ -2,11 +2,11 @@ package local
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/lycis/kami/script"
-	"time"
-	"github.com/lycis/kami/entity"
-	"sync"
 	"github.com/lycis/kami/driver"
+	"github.com/lycis/kami/entity"
+	"github.com/lycis/kami/script"
+	"sync"
+	"time"
 )
 
 // Driver represents the overall game driver state and driver base functions
@@ -17,11 +17,11 @@ type LocalDriver struct {
 	scriptCache       script.ScriptCache
 	cacheCleanupTimer *time.Timer
 
-	activeEntities    map[string]*entity.Entity
-	entityInstances   map[string][]*entity.Entity
+	activeEntities  map[string]*entity.Entity
+	entityInstances map[string][]*entity.Entity
 	entityListMutex sync.Mutex
 
-	lastHeartbeat     time.Time
+	lastHeartbeat time.Time
 }
 
 // New generates a new driver instance that can be executed.
