@@ -1,16 +1,16 @@
 package local
 
 import (
-	"github.com/lycis/kami/entity"
 	log "github.com/Sirupsen/logrus"
-	"github.com/nu7hatch/gouuid"
+	"github.com/lycis/kami/entity"
 	"github.com/lycis/kami/script"
+	"github.com/nu7hatch/gouuid"
 )
 
-func (driver *LocalDriver) SpawnExclusive(rpath string) (*entity.Entity, error) {
+func (driver *LocalDriver) SpawnExclusive(rpath string, creator script.ContextCreator) (*entity.Entity, error) {
 	// TODO check if instances exist
 
-	e, err := driver.createEntityInstance(rpath)
+	e, err := driver.createEntityInstance(rpath, creator)
 	if err != nil {
 		return nil, err
 	}
@@ -23,16 +23,16 @@ func (driver *LocalDriver) SpawnExclusive(rpath string) (*entity.Entity, error) 
 }
 
 // SpawnEntity loads and spawns an entity from the given script path
-func (driver *LocalDriver) SpawnEntity(rpath string) (*entity.Entity, error) {
+func (driver *LocalDriver) SpawnEntity(rpath string, creator script.ContextCreator) (*entity.Entity, error) {
 	// TODO check if exclusive entity exists
 
-	e, err := driver.createEntityInstance(rpath)
+	e, err := driver.createEntityInstance(rpath, creator)
 	if err != nil {
 		return nil, err
 	}
 
 	id, err := uuid.NewV4()
-	if err !=nil {
+	if err != nil {
 		return nil, err
 	}
 
@@ -43,8 +43,8 @@ func (driver *LocalDriver) SpawnEntity(rpath string) (*entity.Entity, error) {
 	return e, nil
 }
 
-func (driver *LocalDriver) createEntityInstance(rpath string) (*entity.Entity, error) {
-	ctx, err := script.ContextForScript(driver, rpath, driver.LibraryDir(), &driver.scriptCache)
+func (driver *LocalDriver) createEntityInstance(rpath string, creator script.ContextCreator) (*entity.Entity, error) {
+	ctx, err := script.ContextForScript(driver, rpath, driver.LibraryDir(), &driver.scriptCache, creator)
 	if err != nil {
 		return nil, err
 	}

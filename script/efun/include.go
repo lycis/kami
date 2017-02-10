@@ -1,8 +1,8 @@
 package efun
 
 import (
-	"github.com/robertkrimen/otto"
 	"github.com/lycis/kami/script"
+	"github.com/robertkrimen/otto"
 )
 
 type efunInclude struct {
@@ -13,6 +13,10 @@ func CreateIncludeEfun(i *script.ScriptContext) script.ExposedFunction {
 	return &efunInclude{
 		script: i,
 	}
+}
+
+func (e efunInclude) RequiredPrivilegeLevel() script.PrivilegeLevel {
+	return script.PrivilegeBasic
 }
 
 func (e efunInclude) Function() func(call otto.FunctionCall) otto.Value {

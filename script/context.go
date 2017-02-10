@@ -1,10 +1,39 @@
 package script
 
 import (
+	"github.com/lycis/kami/entity"
+	"github.com/lycis/kami/kerror"
 	"github.com/robertkrimen/otto"
 	"path/filepath"
-	"github.com/lycis/kami/kerror"
 )
+
+const (
+	// No privileges granted. Meaning no access to any efuns
+	PrivilegeNone = 0
+
+	// Basic privilege level for all objects
+	PrivilegeBasic = 1
+
+	// Highest privilege level. Allows access to all, even insecure and security functions
+	PrivilegeRoot = 10
+)
+
+type PrivilegeLevel int
+
+// Everything that creates a script context should implement this interface
+// and refer to itself so we can trace what create a script. This is especially
+// important for taking over creator information like the inherited privilege level
+type ContextCreator interface {
+	// GetPrivilegeLevel provides the script privilege level of the creator
+	GetScriptPrivilegeLevel() PrivilegeLevel
+
+	// GetScriptReferenceEntity provides a pointer to the entity that
+	// is associated with the code that created the script context.
+	//
+	// This might be nil if no entity is associated with the creator (e.g.
+	// specific driver code might not have an entity as the init script)
+	GetScriptReferenceEntity() *entity.Entity
+}
 
 // When binding a variable to the script context that implements this
 // interface it will receive the virtual machine instance used for parsing
@@ -17,15 +46,17 @@ type BindValueWithInstance interface {
 // This is required for executing any control scripts and will take
 // care of providing values and embedded functions (efuns)
 type ScriptContext struct {
-	libDir string
-	bindings map[string]interface{}
-	cache *ScriptCache
-	vm *otto.Otto
-	driver DriverAPI
+	libDir         string
+	bindings       map[string]interface{}
+	cache          *ScriptCache
+	vm             *otto.Otto
+	driver         DriverAPI
+	privilegeLevel PrivilegeLevel
+	creator        ContextCreator
 }
 
-func ContextForScript(driver DriverAPI, script, libDir string, cache *ScriptCache) (ScriptContext, error) {
-	ctx := NewContext(driver, libDir, cache)
+func ContextForScript(driver DriverAPI, script, libDir string, cache *ScriptCache, creator ContextCreator) (ScriptContext, error) {
+	ctx := NewContext(driver, libDir, cache, creator)
 	if err := ctx.RunScript(script); err != nil {
 		return ScriptContext{}, err
 	}
@@ -34,12 +65,14 @@ func ContextForScript(driver DriverAPI, script, libDir string, cache *ScriptCach
 }
 
 // NewContext generates a new ScriptContext for running a script.
-func NewContext(driver DriverAPI, libDir string, cache *ScriptCache) ScriptContext {
+func NewContext(driver DriverAPI, libDir string, cache *ScriptCache, creator ContextCreator) ScriptContext {
 	return ScriptContext{
-		libDir: libDir,
-		bindings: make(map[string]interface{}),
-		cache: cache,
-		driver: driver,
+		libDir:         libDir,
+		bindings:       make(map[string]interface{}),
+		cache:          cache,
+		driver:         driver,
+		privilegeLevel: creator.GetScriptPrivilegeLevel(),
+		creator:        creator,
 	}
 }
 
@@ -63,7 +96,6 @@ func (ctx *ScriptContext) RunScript(rpath string) error {
 
 	exposeStaticFunctions(ctx)
 	bindValues(ctx)
-
 
 	compiledScript, err := ctx.vm.Compile(rpath, content)
 	if err != nil {
@@ -106,17 +138,30 @@ func (ctx ScriptContext) GetFunction(name string) (otto.Value, error) {
 		return otto.UndefinedValue(), nil
 	}
 
-	return  f, nil
+	return f, nil
 }
 
 func (ctx ScriptContext) RaiseError(name, message string) {
 	panic(ctx.vm.MakeCustomError(name, message))
 }
 
-func (ctx ScriptContext) Vm() *otto.Otto{
-	return  ctx.vm
+func (ctx ScriptContext) Vm() *otto.Otto {
+	return ctx.vm
 }
 
 func (ctx ScriptContext) Driver() DriverAPI {
 	return ctx.driver
+}
+
+// GrantPrivilege sets the privilege level of this script context
+// to the defined one. This can be used to allow scripts access
+// to protected functions or restrict their access.
+//
+// By default a context is created with PrivilegeBasis level.
+func (ctx *ScriptContext) GrantPrivilege(lvl PrivilegeLevel) {
+	ctx.privilegeLevel = lvl
+}
+
+func (ctx ScriptContext) Creator() ContextCreator {
+	return ctx.creator
 }

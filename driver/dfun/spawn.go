@@ -22,6 +22,10 @@ func create_dfun_spawn(i *script.ScriptContext) script.ExposedFunction {
 	}
 }
 
+func (e dfun_spawn) RequiredPrivilegeLevel() script.PrivilegeLevel {
+	return script.PrivilegeBasic
+}
+
 func (e dfun_spawn) Function() func(call otto.FunctionCall) otto.Value {
 	return e.spawn
 }
@@ -55,9 +59,9 @@ func (dfun dfun_spawn) spawn(call otto.FunctionCall) otto.Value {
 	var e *entity.Entity
 
 	if exclusive {
-		e, err = dfun.script.Driver().SpawnExclusive(path)
+		e, err = dfun.script.Driver().SpawnExclusive(path, dfun.script.Creator())
 	} else {
-		e, err =dfun.script.Driver().SpawnEntity(path)
+		e, err = dfun.script.Driver().SpawnEntity(path, dfun.script.Creator())
 	}
 
 	if err != nil {

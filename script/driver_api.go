@@ -1,13 +1,13 @@
 package script
 
 import (
-	"github.com/lycis/kami/entity"
 	"github.com/Sirupsen/logrus"
+	"github.com/lycis/kami/entity"
 )
 
-type DriverAPI interface{
-	SpawnExclusive(rpath string) (*entity.Entity, error)
-	SpawnEntity(rpath string) (*entity.Entity, error)
+type DriverAPI interface {
+	SpawnExclusive(rpath string, creator ContextCreator) (*entity.Entity, error)
+	SpawnEntity(rpath string, creator ContextCreator) (*entity.Entity, error)
 	GetEntityById(id string) *entity.Entity
 	Logger() *logrus.Logger
 }

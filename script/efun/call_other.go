@@ -1,20 +1,23 @@
 package efun
 
 import (
+	"github.com/lycis/kami/kerror"
 	"github.com/lycis/kami/script"
 	"github.com/robertkrimen/otto"
-	"github.com/lycis/kami/kerror"
 )
 
 type efunCallOther struct {
 	script *script.ScriptContext
 }
 
-
 func createCallOther(i *script.ScriptContext) script.ExposedFunction {
 	return &efunCallOther{
 		script: i,
 	}
+}
+
+func (e efunCallOther) RequiredPrivilegeLevel() script.PrivilegeLevel {
+	return script.PrivilegeBasic
 }
 
 func (e efunCallOther) Function() func(call otto.FunctionCall) otto.Value {

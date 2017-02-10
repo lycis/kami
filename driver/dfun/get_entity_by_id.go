@@ -11,9 +11,13 @@ type dfun_get_entity_by_id struct {
 }
 
 func create_dfun_get_entity_by_id(i *script.ScriptContext) script.ExposedFunction {
-	return &dfun_spawn{
+	return &dfun_get_entity_by_id{
 		script: i,
 	}
+}
+
+func (e dfun_get_entity_by_id) RequiredPrivilegeLevel() script.PrivilegeLevel {
+	return script.PrivilegeBasic
 }
 
 func (df dfun_get_entity_by_id) Function() func(call otto.FunctionCall) otto.Value {
