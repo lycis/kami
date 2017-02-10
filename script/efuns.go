@@ -1,8 +1,8 @@
 package script
 
 import (
-	"github.com/robertkrimen/otto"
 	"github.com/lycis/kami/privilege"
+	"github.com/robertkrimen/otto"
 )
 
 type ExposedFunction interface {
@@ -28,8 +28,13 @@ func exposeStaticFunctions(ctx *ScriptContext) {
 
 		// only expose function that the privilege level of the
 		// context grants access to
-		if ctx.privilegeLevel >= efun.RequiredPrivilegeLevel() {
-			ctx.Vm().Set(name, efun.Function())
-		}
+
+		ctx.Vm().Set(name, func(call otto.FunctionCall) otto.Value {
+			if ctx.privilegeLevel >= efun.RequiredPrivilegeLevel() {
+				return efun.Function()(call)
+			} else {
+				panic(ctx.Vm().MakeCustomError("privilege violation", "insufficient privileges"))
+			}
+		})
 	}
 }

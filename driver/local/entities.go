@@ -10,7 +10,7 @@ import (
 func (driver *LocalDriver) SpawnExclusive(rpath string, creator script.ContextCreator) (*entity.Entity, error) {
 	// TODO check if instances exist
 
-	e, err := driver.createEntityInstance(rpath, creator)
+	e, err := driver.createEntityInstance(rpath)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func (driver *LocalDriver) SpawnExclusive(rpath string, creator script.ContextCr
 func (driver *LocalDriver) SpawnEntity(rpath string, creator script.ContextCreator) (*entity.Entity, error) {
 	// TODO check if exclusive entity exists
 
-	e, err := driver.createEntityInstance(rpath, creator)
+	e, err := driver.createEntityInstance(rpath)
 	if err != nil {
 		return nil, err
 	}
@@ -43,14 +43,16 @@ func (driver *LocalDriver) SpawnEntity(rpath string, creator script.ContextCreat
 	return e, nil
 }
 
-func (driver *LocalDriver) createEntityInstance(rpath string, creator script.ContextCreator) (*entity.Entity, error) {
-	ctx, err := script.ContextForScript(driver, rpath, driver.LibraryDir(), &driver.scriptCache, creator)
+func (driver *LocalDriver) createEntityInstance(rpath string) (*entity.Entity, error) {
+	ctx, err := script.ContextForScript(driver, rpath, driver.LibraryDir(), &driver.scriptCache)
 	if err != nil {
 		return nil, err
 	}
 
-	e, err := entity.NewEntity(&ctx)
-	if err != nil {
+	e := entity.NewEntity()
+	ctx.SetCreator(e)
+
+	if err := e.Create(&ctx); err != nil {
 		return nil, err
 	}
 

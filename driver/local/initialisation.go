@@ -35,7 +35,8 @@ func (d *LocalDriver) callInitScript(file string) {
 		return
 	}
 
-	ctx := script.NewContext(d, d.libraryDir, &d.scriptCache, d)
+	ctx := script.NewContext(d, d.libraryDir, &d.scriptCache)
+	ctx.SetCreator(d)
 
 	if err := ctx.RunScript(file); err != nil {
 		log.WithError(err).Fatal("Executing the init script failed.")

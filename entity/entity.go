@@ -23,14 +23,18 @@ type script_context_api interface {
 	PrivilegeLevel() privilege.Level
 }
 
-func NewEntity(ctx script_context_api) (*Entity, error) {
+func NewEntity() *Entity {
 	e := &Entity{
 		properties: make(map[string]interface{}),
-		script:     ctx,
 	}
 
+	return e
+}
+
+func (e *Entity) Create(script script_context_api) error {
+	e.script = script
 	_, err := e.script.Call("$create", e)
-	return e, err
+	return err
 }
 
 func (e *Entity) Heartbeat() {
@@ -55,4 +59,15 @@ func (e *Entity) Call(funName string, args ...interface{}) (otto.Value, error) {
 
 func (e Entity) Context() script_context_api {
 	return e.script
+}
+
+func (e Entity) GetScriptPrivilegeLevel() privilege.Level {
+	if e.script == nil {
+		return privilege.PrivilegeNone
+	}
+
+	return e.script.PrivilegeLevel()
+}
+func (e *Entity) GetScriptReferenceEntity() *Entity {
+	return e
 }

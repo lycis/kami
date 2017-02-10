@@ -17,7 +17,7 @@ func CreateIncludeEfun(i *script.ScriptContext) script.ExposedFunction {
 }
 
 func (e efunInclude) RequiredPrivilegeLevel() privilege.Level {
-	return privilege.PrivilegeBasic
+	return privilege.PrivilegeNone
 }
 
 func (e efunInclude) Function() func(call otto.FunctionCall) otto.Value {

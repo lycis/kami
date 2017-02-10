@@ -43,8 +43,8 @@ type ScriptContext struct {
 	creator        ContextCreator
 }
 
-func ContextForScript(driver DriverAPI, script, libDir string, cache *ScriptCache, creator ContextCreator) (ScriptContext, error) {
-	ctx := NewContext(driver, libDir, cache, creator)
+func ContextForScript(driver DriverAPI, script, libDir string, cache *ScriptCache) (ScriptContext, error) {
+	ctx := NewContext(driver, libDir, cache)
 	if err := ctx.RunScript(script); err != nil {
 		return ScriptContext{}, err
 	}
@@ -53,14 +53,13 @@ func ContextForScript(driver DriverAPI, script, libDir string, cache *ScriptCach
 }
 
 // NewContext generates a new ScriptContext for running a script.
-func NewContext(driver DriverAPI, libDir string, cache *ScriptCache, creator ContextCreator) ScriptContext {
+func NewContext(driver DriverAPI, libDir string, cache *ScriptCache) ScriptContext {
 	return ScriptContext{
 		libDir:         libDir,
 		bindings:       make(map[string]interface{}),
 		cache:          cache,
 		driver:         driver,
-		privilegeLevel: creator.GetScriptPrivilegeLevel(),
-		creator:        creator,
+		privilegeLevel: privilege.PrivilegeNone,
 	}
 }
 
@@ -156,4 +155,9 @@ func (ctx ScriptContext) PrivilegeLevel() privilege.Level {
 
 func (ctx ScriptContext) Creator() ContextCreator {
 	return ctx.creator
+}
+
+func (ctx *ScriptContext) SetCreator(c ContextCreator) {
+	ctx.creator = c
+	ctx.privilegeLevel = c.GetScriptPrivilegeLevel()
 }

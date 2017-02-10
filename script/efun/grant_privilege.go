@@ -80,7 +80,7 @@ func (e efun_grant_privilege) Function() func(call otto.FunctionCall) otto.Value
 		}
 
 		originalLevel := target.Context().PrivilegeLevel()
-		e.script.Driver().Logger().WithFields(logrus.Fields{"from-level": originalLevel, "to-level": level, "entity": fmt.Sprintf("%s#%s", target.GetProp(entity.P_SYS_PATH), target.GetProp(entity.P_SYS_ID))}).Info("Changed privilege level.")
+		e.script.Driver().Logger().WithFields(logrus.Fields{"e": e.script.Creator().GetScriptReferenceEntity(), "from-level": originalLevel, "to-level": level, "entity": fmt.Sprintf("%s#%s", target.GetProp(entity.P_SYS_PATH), target.GetProp(entity.P_SYS_ID))}).Info("Changed privilege level.")
 		target.Context().GrantPrivilege(privilege.Level(level))
 		return otto.TrueValue()
 	}
