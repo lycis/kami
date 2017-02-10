@@ -8,6 +8,11 @@ import (
 	"sync"
 )
 
+type HeartbeatError struct {
+	Error  error
+	Entity *Entity
+}
+
 // Entity represents any in-game object that exists
 type Entity struct {
 	properties map[string]interface{}
@@ -21,6 +26,7 @@ type script_context_api interface {
 	GetFunction(name string) (otto.Value, error)
 	GrantPrivilege(lvl privilege.Level)
 	PrivilegeLevel() privilege.Level
+	Vm() *otto.Otto
 }
 
 func NewEntity() *Entity {
@@ -41,14 +47,14 @@ func (e *Entity) Heartbeat() {
 	f, err := e.script.GetFunction("$tick")
 	if err != nil {
 		log.WithError(kerror.ToError(err)).WithFields(log.Fields{"path": e.GetProp("$path"), "uuid": e.GetProp("$uuid")}).Error("Executing tick function failed.")
-		return
+		panic(HeartbeatError{err, e})
 	}
 
 	if f.IsDefined() {
 		_, err := e.script.Call("$tick", e)
 		if err != nil {
 			log.WithError(kerror.ToError(err)).WithFields(log.Fields{"path": e.GetProp("$path"), "uuid": e.GetProp("$uuid")}).Error("Executing tick function failed.")
-			return
+			panic(HeartbeatError{err, e})
 		}
 	}
 }

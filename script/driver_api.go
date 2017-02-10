@@ -10,4 +10,5 @@ type DriverAPI interface {
 	SpawnEntity(rpath string, creator ContextCreator) (*entity.Entity, error)
 	GetEntityById(id string) *entity.Entity
 	Logger() *logrus.Logger
+	SetHook(hook int64, value interface{}) error
 }

@@ -1,10 +1,12 @@
 package local
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/lycis/kami/driver"
 	"github.com/lycis/kami/entity"
 	"github.com/lycis/kami/script"
+	"github.com/robertkrimen/otto"
 	"sync"
 	"time"
 )
@@ -22,6 +24,8 @@ type LocalDriver struct {
 	entityListMutex sync.Mutex
 
 	lastHeartbeat time.Time
+
+	hooks map[int64]otto.Value
 }
 
 // New generates a new driver instance that can be executed.
@@ -34,6 +38,7 @@ func New(libDir string) driver.Driver {
 		scriptCache:     script.NewCache(),
 		activeEntities:  make(map[string]*entity.Entity),
 		entityInstances: make(map[string][]*entity.Entity),
+		hooks:           make(map[int64]otto.Value),
 	}
 }
 
@@ -58,4 +63,18 @@ func (d LocalDriver) Logger() *log.Logger {
 
 func (d LocalDriver) GetEntityById(id string) *entity.Entity {
 	return d.activeEntities[id]
+}
+
+func (d *LocalDriver) SetHook(hook int64, value interface{}) error {
+	ov, ok := value.(otto.Value)
+	if !ok {
+		return fmt.Errorf("local driver only supports javascript function calls")
+	}
+
+	if !ov.IsFunction() {
+		return fmt.Errorf("local driver only supports javascript function calls")
+	}
+
+	d.hooks[hook] = ov
+	return nil
 }
