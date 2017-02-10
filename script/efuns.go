@@ -2,11 +2,12 @@ package script
 
 import (
 	"github.com/robertkrimen/otto"
+	"github.com/lycis/kami/privilege"
 )
 
 type ExposedFunction interface {
 	Function() func(call otto.FunctionCall) otto.Value
-	RequiredPrivilegeLevel() PrivilegeLevel
+	RequiredPrivilegeLevel() privilege.Level
 }
 
 type EFunCreator func(ctx *ScriptContext) ExposedFunction

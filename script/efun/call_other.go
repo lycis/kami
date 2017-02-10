@@ -4,6 +4,7 @@ import (
 	"github.com/lycis/kami/kerror"
 	"github.com/lycis/kami/script"
 	"github.com/robertkrimen/otto"
+	"github.com/lycis/kami/privilege"
 )
 
 type efunCallOther struct {
@@ -16,8 +17,8 @@ func createCallOther(i *script.ScriptContext) script.ExposedFunction {
 	}
 }
 
-func (e efunCallOther) RequiredPrivilegeLevel() script.PrivilegeLevel {
-	return script.PrivilegeBasic
+func (e efunCallOther) RequiredPrivilegeLevel() privilege.Level {
+	return privilege.PrivilegeBasic
 }
 
 func (e efunCallOther) Function() func(call otto.FunctionCall) otto.Value {

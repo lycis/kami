@@ -1,6 +1,7 @@
 package efun
 
 import (
+	"github.com/lycis/kami/privilege"
 	"github.com/lycis/kami/script"
 	"github.com/robertkrimen/otto"
 )
@@ -15,8 +16,8 @@ func CreateIncludeEfun(i *script.ScriptContext) script.ExposedFunction {
 	}
 }
 
-func (e efunInclude) RequiredPrivilegeLevel() script.PrivilegeLevel {
-	return script.PrivilegeBasic
+func (e efunInclude) RequiredPrivilegeLevel() privilege.Level {
+	return privilege.PrivilegeBasic
 }
 
 func (e efunInclude) Function() func(call otto.FunctionCall) otto.Value {

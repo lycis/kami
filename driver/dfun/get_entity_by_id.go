@@ -2,6 +2,7 @@ package dfun
 
 import (
 	"github.com/lycis/kami/kerror"
+	"github.com/lycis/kami/privilege"
 	"github.com/lycis/kami/script"
 	"github.com/robertkrimen/otto"
 )
@@ -16,8 +17,8 @@ func create_dfun_get_entity_by_id(i *script.ScriptContext) script.ExposedFunctio
 	}
 }
 
-func (e dfun_get_entity_by_id) RequiredPrivilegeLevel() script.PrivilegeLevel {
-	return script.PrivilegeBasic
+func (e dfun_get_entity_by_id) RequiredPrivilegeLevel() privilege.Level {
+	return privilege.PrivilegeBasic
 }
 
 func (df dfun_get_entity_by_id) Function() func(call otto.FunctionCall) otto.Value {

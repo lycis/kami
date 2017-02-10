@@ -1,10 +1,11 @@
 package entity
 
 import (
-	"sync"
 	log "github.com/Sirupsen/logrus"
-	"github.com/robertkrimen/otto"
 	"github.com/lycis/kami/kerror"
+	"github.com/lycis/kami/privilege"
+	"github.com/robertkrimen/otto"
+	"sync"
 )
 
 // Entity represents any in-game object that exists
@@ -18,19 +19,19 @@ type Entity struct {
 type script_context_api interface {
 	Call(name string, this interface{}, args ...interface{}) (otto.Value, error)
 	GetFunction(name string) (otto.Value, error)
+	GrantPrivilege(lvl privilege.Level)
+	PrivilegeLevel() privilege.Level
 }
 
 func NewEntity(ctx script_context_api) (*Entity, error) {
-	e := &Entity {
+	e := &Entity{
 		properties: make(map[string]interface{}),
-		script: ctx,
+		script:     ctx,
 	}
 
 	_, err := e.script.Call("$create", e)
 	return e, err
 }
-
-
 
 func (e *Entity) Heartbeat() {
 	f, err := e.script.GetFunction("$tick")
@@ -48,6 +49,10 @@ func (e *Entity) Heartbeat() {
 	}
 }
 
-func (e *Entity) Call(funName string, args... interface{}) (otto.Value, error) {
+func (e *Entity) Call(funName string, args ...interface{}) (otto.Value, error) {
 	return e.script.Call(funName, e, args...)
+}
+
+func (e Entity) Context() script_context_api {
+	return e.script
 }

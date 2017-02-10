@@ -3,29 +3,17 @@ package script
 import (
 	"github.com/lycis/kami/entity"
 	"github.com/lycis/kami/kerror"
+	"github.com/lycis/kami/privilege"
 	"github.com/robertkrimen/otto"
 	"path/filepath"
 )
-
-const (
-	// No privileges granted. Meaning no access to any efuns
-	PrivilegeNone = 0
-
-	// Basic privilege level for all objects
-	PrivilegeBasic = 1
-
-	// Highest privilege level. Allows access to all, even insecure and security functions
-	PrivilegeRoot = 10
-)
-
-type PrivilegeLevel int
 
 // Everything that creates a script context should implement this interface
 // and refer to itself so we can trace what create a script. This is especially
 // important for taking over creator information like the inherited privilege level
 type ContextCreator interface {
 	// GetPrivilegeLevel provides the script privilege level of the creator
-	GetScriptPrivilegeLevel() PrivilegeLevel
+	GetScriptPrivilegeLevel() privilege.Level
 
 	// GetScriptReferenceEntity provides a pointer to the entity that
 	// is associated with the code that created the script context.
@@ -51,7 +39,7 @@ type ScriptContext struct {
 	cache          *ScriptCache
 	vm             *otto.Otto
 	driver         DriverAPI
-	privilegeLevel PrivilegeLevel
+	privilegeLevel privilege.Level
 	creator        ContextCreator
 }
 
@@ -158,8 +146,12 @@ func (ctx ScriptContext) Driver() DriverAPI {
 // to protected functions or restrict their access.
 //
 // By default a context is created with PrivilegeBasis level.
-func (ctx *ScriptContext) GrantPrivilege(lvl PrivilegeLevel) {
+func (ctx *ScriptContext) GrantPrivilege(lvl privilege.Level) {
 	ctx.privilegeLevel = lvl
+}
+
+func (ctx ScriptContext) PrivilegeLevel() privilege.Level {
+	return ctx.privilegeLevel
 }
 
 func (ctx ScriptContext) Creator() ContextCreator {

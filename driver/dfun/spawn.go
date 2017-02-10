@@ -3,6 +3,7 @@ package dfun
 import (
 	"github.com/lycis/kami/entity"
 	"github.com/lycis/kami/kerror"
+	"github.com/lycis/kami/privilege"
 	"github.com/lycis/kami/script"
 	"github.com/robertkrimen/otto"
 )
@@ -22,8 +23,8 @@ func create_dfun_spawn(i *script.ScriptContext) script.ExposedFunction {
 	}
 }
 
-func (e dfun_spawn) RequiredPrivilegeLevel() script.PrivilegeLevel {
-	return script.PrivilegeBasic
+func (e dfun_spawn) RequiredPrivilegeLevel() privilege.Level {
+	return privilege.PrivilegeBasic
 }
 
 func (e dfun_spawn) Function() func(call otto.FunctionCall) otto.Value {
