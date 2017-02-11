@@ -13,10 +13,14 @@ import (
 //
 // Hooks:
 //   H_HB_ON_ERROR - function is called when an error occurs in the
-//                     heartbeat call
+//                     heartbeat call (this = erring entity, error = error string)
+//   H_USER_CONNECT - called when a user connects to the game driver (this = user)
+//   H_USER_DISCONNECT - called when a user connects to the game driver (this = user)
 
 const (
-	H_HB_ON_ERROR = iota
+	H_HB_ON_ERROR     = 0
+	H_USER_CONNECT    = 1
+	H_USER_DISCONNECT = 2
 )
 
 type dfun_set_driver_hook struct {
