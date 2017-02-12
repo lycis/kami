@@ -1,0 +1,88 @@
+CONCEPT
+    Driver Intercom
+
+ OVERVIEW
+    The driver intercom handles the communication between drivers and front
+    ends via network (TCP). It is used whenever a driver or front-end wants
+    to exchange data with a remote located component (e.g. remote sharding,
+    pushing information to users). The protocol is designed to send
+    multiple types of commands and requests at once.
+
+    In general the intercom works by exchanging JSON documents between involved
+    participants (P). Each JSON may contain a number of information snippets
+    for a target component (C) that is attached to a participant.
+
+                               +------------+
+        +----      +----+     /              \     +----+     +----+
+        | C1 | --> | P1 | <--+ NETWORK (TCP)  +--> | P2 | <-- | C2 |
+        +----+     +----+     \              /     +----+     +----+
+                               +------------+
+
+    PARTICIPANTs are responsible for exchaning messages in behalf of a component.
+    They are the only actual parts communicating within the network. A participant
+    dispatches message in behalf of a component and will in general not communicate
+    otherwise except for keep-alive messages. A participant may be connected to
+    multiple other participants and will have multiple components attached.
+
+    COMPONENTs are attached to a participant and are the sources and sinks for
+    messages. They are the only actual parts that send and receive messages
+    via their attached participant. Each component may only be connected to one
+    participant to prevent message cycles and ambiguous routing paths.
+
+MESSAGE FORMAT
+    Each message is represent by a JSON document that is sent from one participant
+    to another. There is a finite list of supported fields for this JSON
+    document. Anonymous fields are not supported. This section lists all
+    supported key names, their format and expected content. Simple fields
+    will be fully explained inline while more complex topics will be present
+    in their own section.
+
+    "envelope":  The envelope key contains the basic routing information for the
+                 snippet. It is a JSON document. For more see ADDRESSING
+
+                 "to":
+                     address of the target component (string)
+
+                 "from":
+                     address of the sending component (string)
+
+                 "seq-id":
+                     the sequential ID of this message. The sending participant
+                     has to use incrementing, sequential IDs for all messages and
+                     also has to guarantee they are not repeated within a sane
+                     time range and also that they incremented with each sent
+                     snippet. The participant does not have to guarantee that
+                     they are incremented by the same number every time
+
+                     Example:
+                         seq-id 1 may be followed by2 and then 97 but not 2
+
+                     There is only one exception to the incrementation rule:
+                     The IDs may switch from positive to negative and vice
+                     versa. This is called an ID-roll-over and may be used
+                     for conveniently handling "endless-increments". When
+                     such a roll-over happens it indicates that previously
+                     sent IDs might be repeated in future.
+
+
+                 "relay":
+                     contains a list of participants that forwarded that
+                     request before it hit its target (string array)
+
+ADDRESSING
+    As all participants together may form rather complex networks adressing a
+    snippet is very important (and thus also very simple). Basically all
+    addresses are similar to E-Mail addresses: "<component>@<provider>"
+
+    The <component> is identified by its provider-unique ID that is advertised
+    by the component itself. The provider may reject duplicate IDs. The
+    component ID must consist of alphanumerical (A-Za-z0-9) characters
+    without spaces and may contain these additional characters: .-_
+
+    The <provider> is simply identified by its IP address or DNS name.
+
+    Examples:
+        shard_7@192.168.5.1
+        main.driver@example.com
+        root@server
+
