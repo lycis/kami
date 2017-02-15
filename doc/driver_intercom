@@ -37,37 +37,58 @@ MESSAGE FORMAT
     will be fully explained inline while more complex topics will be present
     in their own section.
 
-    "envelope":  The envelope key contains the basic routing information for the
-                 snippet. It is a JSON document. For more see ADDRESSING
+    "envelope":
+        The envelope key contains the basic routing information for the
+        snippet. It is a JSON document. For more see ADDRESSING
 
-                 "to":
-                     address of the target component (string)
+        "to":
+            address of the target component (string)
 
-                 "from":
-                     address of the sending component (string)
+        "from":
+            address of the sending component (string)
 
-                 "seq-id":
-                     the sequential ID of this message. The sending participant
-                     has to use incrementing, sequential IDs for all messages and
-                     also has to guarantee they are not repeated within a sane
-                     time range and also that they incremented with each sent
-                     snippet. The participant does not have to guarantee that
-                     they are incremented by the same number every time
+        "seq-id":
+            the sequential ID of this message. The sending participant has to
+            use incrementing, sequential IDs for all messages and also has to
+            guarantee they are not repeated within a sane time range and also
+            that they incremented with each sent snippet. The participant does
+            not have to guarantee that they are incremented by the same number
+            every time.
 
-                     Example:
-                         seq-id 1 may be followed by2 and then 97 but not 2
+            Eample:
+                 seq-id 1 may be followed by2 and then 97 but not 2
 
-                     There is only one exception to the incrementation rule:
-                     The IDs may switch from positive to negative and vice
-                     versa. This is called an ID-roll-over and may be used
-                     for conveniently handling "endless-increments". When
-                     such a roll-over happens it indicates that previously
-                     sent IDs might be repeated in future.
+            There is only one exception to the incrementation rule:
+            The IDs may switch from positive to negative and vice versa. This
+            is called an ID-roll-over and may be used for conveniently handling
+            "endless-increments". When such a roll-over happens it indicates
+            that previously sent IDs might be repeated in future.
 
+        "relay":
+            contains a list of participants that forwarded that request before
+            it hit its target (string array)
 
-                 "relay":
-                     contains a list of participants that forwarded that
-                     request before it hit its target (string array)
+    "advertise":
+        This element contains advertisement information of the sending participant
+        (see STARTUPADVERTISING below). It is usually sent when a participant
+        goes online and makes contact with its known neighbours but it also may
+        be repeated at any time when settings of the participant change (e.g.
+        extensions are supported or desupported) during runtime.
+
+        "address":
+            contains the address and port that this participant has to be
+            contacted at (e.g. 192.168.0.1:5001) (string)
+
+        "extensions":
+            lists all supported intercom extensions (string array)
+
+    "neighbours":
+        The neighbours label is used to update directly connected participants
+        with a list of known neighbours of yourself. This information may be
+        required by participants for interouting information snippets. It
+        consists of a list of JSON objects, one for each neighbours advertise
+        information.
+
 
 ADDRESSING
     As all participants together may form rather complex networks adressing a
@@ -86,3 +107,23 @@ ADDRESSING
         main.driver@example.com
         root@server
 
+STARTUP ADVERTISING
+    A new participant that starts has to advertise himself to all known
+    neighbors. This is done sending the "advertise" label and providing the
+    required information. It is expected that the remote participant replies
+    with his neighbours list when the sending participant was accepted or
+    simply disconnects in the other case. A disconnect at this stage
+    indicates that the receiving participant will, for some reason, not operate
+    with the sender (e.g. protocol version mismatch, required but unsupported
+    extensions).
+
+    Flow Chart:
+                  Sender                                           Receiver
+     (start) ----> +
+                   |
+                   |-------------------(advertise)------------------->+
+                   |                                                  |
+                   |<-----------------(neighbours)--------------------+
+                   |
+     (accepted <---+
+      neighbour)
