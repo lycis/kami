@@ -39,7 +39,10 @@ MESSAGE FORMAT
 
     "envelope":
         The envelope key contains the basic routing information for the
-        snippet. It is a JSON document. For more see ADDRESSING
+        snippet. It is a JSON document. For more see ADDRESSING. The
+        envelope is only required when addressing components and not
+        required when participants are exchanging information (e.g.
+        advertise or neighbours labels)
 
         "to":
             address of the target component (string)
@@ -127,3 +130,9 @@ STARTUP ADVERTISING
                    |
      (accepted <---+
       neighbour)
+
+WIRE FORMAT
+    The line format describes how data is transferred "over the wire". For the
+    intercom protocol this is very simple. Each message is a base64 encoded
+    JSON string that ends with a line break (\n). The base64 encoding prevents
+    necessary conversions of special characters.

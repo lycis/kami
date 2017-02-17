@@ -6,3 +6,4 @@ import:
 - package: github.com/ogier/pflag
   version: ^0.0.1
 - package: github.com/robertkrimen/otto
+- package: gopkg.in/readline.v1
