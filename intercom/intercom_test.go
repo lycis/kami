@@ -9,7 +9,7 @@ import (
 func startParticipant(t *testing.T) Participant {
 	p := NewParticipant()
 	go func() {
-		err := p.Listen("tcp", "127.0.0.1:1775")
+		err := p.Listen("tcp", "127.0.0.1:0")
 		if err != nil {
 			t.Log("listen failed: %s", err)
 			t.Fail()
@@ -31,7 +31,7 @@ func startParticipant(t *testing.T) Participant {
 func TestListen(t *testing.T) {
 	p := startParticipant(t)
 
-	socket, err := net.Dial("tcp", "127.0.0.1:1775")
+	socket, err := net.Dial(p.Addr().Network(), p.Addr().String())
 	if err != nil {
 		t.Log("connection failed: %s", err)
 		t.Fail()
@@ -49,4 +49,15 @@ func TestListen(t *testing.T) {
 		t.Fail()
 		return
 	}
+}
+
+func TestStartup(t *testing.T) {
+	a := startParticipant(t)
+	b := startParticipant(t)
+
+	a.AddNeighbour(b.Addr().String())
+	b.AddNeighbour(a.Addr().String())
+
+	a.Close()
+	b.Close()
 }

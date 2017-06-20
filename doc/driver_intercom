@@ -79,8 +79,8 @@ MESSAGE FORMAT
         extensions are supported or desupported) during runtime.
 
         "address":
-            contains the address and port that this participant has to be
-            contacted at (e.g. 192.168.0.1:5001) (string)
+            contains the addresses and ports that this participant has to be
+            contacted at (e.g. 192.168.0.1:5001) (string array)
 
         "extensions":
             lists all supported intercom extensions (string array)

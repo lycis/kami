@@ -25,6 +25,14 @@ type Participant interface {
 	// Ready checks checks whether the partcipant is ready for
 	// connections and responsive.
 	Ready() bool
+
+	// Sends the given information snippet.
+	Send(snippet Message) error
+
+	// AddNeighbour initiates a connection to the listed participant.
+	AddNeighbour(address string) error
+
+	Addr() net.Addr
 }
 
 type _participant struct {
@@ -37,7 +45,14 @@ type _participant struct {
 
 	listener net.Listener
 
+	// set to true when the listener was initialised
 	listening bool
+
+	// the list of our known neighbours
+	neighbours map[string]*Advertise
+
+	// use during the AddNeighbours start up for synchronous waiting
+	waitStartup sync.WaitGroup
 }
 
 func NewParticipant() Participant {
@@ -120,4 +135,34 @@ func (self *_participant) Close() error {
 
 func (self *_participant) Ready() bool {
 	return self.listener != nil && self.listening
+}
+
+func (self *_participant) Send(snippet Message) error {
+	return nil
+}
+
+func (self *_participant) AddNeighbour(address string) error {
+	m := Message{
+		Advertise: &Advertise{
+			Address: []string{self.listener.Addr().String()},
+		},
+	}
+
+	var err error
+	self.waitStartup.Add(1)
+	go func() {
+		err = self.Send(m)
+		self.waitStartup.Done()
+	}()
+	self.waitStartup.Wait()
+
+	if err != nil {
+		return err
+	}
+
+	// TODO wait for neighbours message or deconnect
+}
+
+func (self *_participant) Addr() net.Addr {
+	return self.listener.Addr()
 }
