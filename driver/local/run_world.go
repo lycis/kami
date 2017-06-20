@@ -18,6 +18,7 @@ func (driver *LocalDriver) RunWorld() {
 		time.Sleep(time.Millisecond * 10)
 	}
 }
+
 func (driver *LocalDriver) heartbeat() {
 	for path, instances := range driver.entityInstances {
 		log.WithField("path", path).Debug("Calling heartbeat for instance shard.")
