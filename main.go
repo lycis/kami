@@ -6,6 +6,10 @@ import (
 	flag "github.com/ogier/pflag"
 	"os"
 	"strings"
+
+	// import for side effect of registering functions
+	_ "github.com/lycis/kami/driver/dfun"
+	_ "github.com/lycis/kami/script/efun"
 )
 
 func main() {

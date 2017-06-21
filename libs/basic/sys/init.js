@@ -1,1 +1,1 @@
-console.log("Booting basic kernel...");
+log("INFO", "Booting kernel...");
