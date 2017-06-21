@@ -159,5 +159,4 @@ func (ctx ScriptContext) Creator() ContextCreator {
 
 func (ctx *ScriptContext) SetCreator(c ContextCreator) {
 	ctx.creator = c
-	ctx.privilegeLevel = c.GetScriptPrivilegeLevel()
 }

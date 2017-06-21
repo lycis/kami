@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-type HeartbeatError struct {
+type FunctionInvocationError struct {
 	Error  error
 	Entity *Entity
 }
@@ -47,14 +47,30 @@ func (e *Entity) Heartbeat() {
 	f, err := e.script.GetFunction("$tick")
 	if err != nil {
 		log.WithError(kerror.ToError(err)).WithFields(log.Fields{"path": e.GetProp("$path"), "uuid": e.GetProp("$uuid")}).Error("Executing tick function failed.")
-		panic(HeartbeatError{err, e})
+		panic(FunctionInvocationError{err, e})
 	}
 
 	if f.IsDefined() {
 		_, err := e.script.Call("$tick", e)
 		if err != nil {
 			log.WithError(kerror.ToError(err)).WithFields(log.Fields{"path": e.GetProp("$path"), "uuid": e.GetProp("$uuid")}).Error("Executing tick function failed.")
-			panic(HeartbeatError{err, e})
+			panic(FunctionInvocationError{err, e})
+		}
+	}
+}
+
+func (e *Entity) OnShutdown(reason string) {
+	f, err := e.script.GetFunction("$onShutdown")
+	if err != nil {
+		log.WithError(kerror.ToError(err)).WithFields(log.Fields{"path": e.GetProp("$path"), "uuid": e.GetProp("$uuid")}).Error("Executing $onShutdown function failed.")
+		panic(FunctionInvocationError{err, e})
+	}
+
+	if f.IsDefined() {
+		_, err := e.script.Call("$onShutdown", e, reason)
+		if err != nil {
+			log.WithError(kerror.ToError(err)).WithFields(log.Fields{"path": e.GetProp("$path"), "uuid": e.GetProp("$uuid")}).Error("Executing tick function failed.")
+			panic(FunctionInvocationError{err, e})
 		}
 	}
 }

@@ -3,6 +3,7 @@ package local
 import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
+	"github.com/lycis/kami/privilege"
 	"github.com/lycis/kami/script"
 	"os"
 	"time"
@@ -37,6 +38,7 @@ func (d *LocalDriver) callInitScript(file string) {
 
 	ctx := script.NewContext(d, d.libraryDir, &d.scriptCache)
 	ctx.SetCreator(d)
+	ctx.GrantPrivilege(privilege.PrivilegeRoot)
 
 	if err := ctx.RunScript(file); err != nil {
 		log.WithError(err).Fatal("Executing the init script failed.")

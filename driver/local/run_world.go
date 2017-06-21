@@ -9,7 +9,8 @@ import (
 )
 
 func (driver *LocalDriver) RunWorld() {
-	for {
+	driver.running = true
+	for driver.running {
 		// call heartbeat
 		if time.Now().Sub(driver.lastHeartbeat) > time.Second*2 {
 			driver.heartbeat()
@@ -25,7 +26,7 @@ func (driver *LocalDriver) heartbeat() {
 		go func() {
 			defer func() {
 				if err := recover(); err != nil {
-					hberror := err.(entity.HeartbeatError)
+					hberror := err.(entity.FunctionInvocationError)
 					if hb_err_func, ok := driver.hooks[dfun.H_HB_ON_ERROR]; ok {
 						ovEntity, err := hberror.Entity.Context().Vm().ToValue(hberror.Entity)
 						if err != nil {
