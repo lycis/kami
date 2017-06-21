@@ -90,16 +90,19 @@ func (d *LocalDriver) Shutdown(reason string) error {
 	}
 
 	d.Log.WithField("reason", reason).Info("* * * Driver is going to H A L T * * *")
-	d.running = false
-	d.Log.Debug("World stopped.")
 	d.Log.Debug("Informing entities of shutdown.")
+	var wg sync.WaitGroup
+	for _, instances := range d.entityInstances {
+		wg.Add(len(instances))
+	}
+
 	d.forAllInstances(func(shard []*entity.Entity) {
 		for _, e := range shard {
 			defer func() {
 				if err := recover(); err != nil {
 					xerr, ok := err.(entity.FunctionInvocationError)
 					if ok {
-						log.WithField("entity", fmt.Sprintf("%s#%s", xerr.Entity.GetProp(entity.P_SYS_PATH), xerr.Entity.GetProp(entity.P_SYS_PATH))).WithError(xerr.Error).Error("Calling heratbeat error hook failed")
+						d.Log.WithField("entity", fmt.Sprintf("%s#%s", xerr.Entity.GetProp(entity.P_SYS_PATH), xerr.Entity.GetProp(entity.P_SYS_PATH))).WithError(xerr.Error).Error("Calling heratbeat error hook failed")
 					} else {
 						d.Log.WithError(err.(error)).Warn("Error in shutdown processing of unknown entity.")
 					}
@@ -108,9 +111,14 @@ func (d *LocalDriver) Shutdown(reason string) error {
 
 			d.Log.WithField("entity", fmt.Sprintf("%s#%s", e.GetProp(entity.P_SYS_PATH), e.GetProp(entity.P_SYS_PATH))).Debug("executing onShutdown for entity")
 			e.OnShutdown(reason)
+			wg.Done()
 		}
 	})
+	wg.Wait()
 	d.Log.Debug("Entities informed.")
+
+	d.running = false
+	d.Log.Debug("World stopped.")
 
 	d.Log.Info("Driver stopped.")
 	return nil
@@ -118,7 +126,7 @@ func (d *LocalDriver) Shutdown(reason string) error {
 
 func (d *LocalDriver) forAllInstances(f func([]*entity.Entity)) {
 	for path, instances := range d.entityInstances {
-		log.WithFields(log.Fields{"path": path, "function": getFunctionName(f)}).Debug("Calling function for instance shard.")
+		d.Log.WithFields(log.Fields{"path": path, "function": getFunctionName(f)}).Debug("Calling function for instance shard.")
 		go func() {
 			f(instances)
 		}()
