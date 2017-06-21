@@ -85,6 +85,10 @@ func (d *LocalDriver) SetHook(hook int64, value interface{}) error {
 }
 
 func (d *LocalDriver) Shutdown(reason string) error {
+	if !d.running {
+		return fmt.Errorf("world not in running state")
+	}
+
 	d.Log.WithField("reason", reason).Info("* * * Driver is going to H A L T * * *")
 	d.running = false
 	d.Log.Debug("World stopped.")

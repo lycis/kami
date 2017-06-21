@@ -14,9 +14,11 @@ import (
 // Hooks:
 //   H_HB_ON_ERROR - function is called when an error occurs in the
 //                     heartbeat call
+//  H_WHEN_WORLD_RUN - this function is called when the world enters the running state (this = driver!)
 
 const (
-	H_HB_ON_ERROR = iota
+	H_HB_ON_ERROR    = 0
+	H_WHEN_WORLD_RUN = 1
 )
 
 type dfun_set_driver_hook struct {

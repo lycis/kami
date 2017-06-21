@@ -5,11 +5,17 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/lycis/kami/driver/dfun"
 	"github.com/lycis/kami/entity"
+	"github.com/robertkrimen/otto"
 	"time"
 )
 
 func (driver *LocalDriver) RunWorld() {
 	driver.running = true
+
+	if hook_func, hook_set := driver.hooks[dfun.H_WHEN_WORLD_RUN]; hook_set {
+		hook_func.Call(otto.UndefinedValue())
+	}
+
 	for driver.running {
 		// call heartbeat
 		if time.Now().Sub(driver.lastHeartbeat) > time.Second*2 {

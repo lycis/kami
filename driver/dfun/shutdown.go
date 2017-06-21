@@ -39,7 +39,10 @@ func (df dfun_shutdown) Function() func(call otto.FunctionCall) otto.Value {
 			panic(df.script.Vm().MakeSyntaxError("shutdown(reason: string): requires reason to be string"))
 		}
 
-		df.script.Driver().Shutdown(reason)
+		if err := df.script.Driver().Shutdown(reason); err != nil {
+			panic(df.script.Vm().MakeCustomError("invalid state", err.Error()))
+		}
+
 		return otto.UndefinedValue()
 	}
 }
