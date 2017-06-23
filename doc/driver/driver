@@ -1,0 +1,24 @@
+NAME
+    driver
+
+DESCRIPTION
+    The driver is the base component of the Kami _Driver_. It is the master
+    process that handles all in-world interactions, scripts and exections.
+
+    When starting it will first initialse by calling the init script. By
+    default is expected to be located in <libdir>/sys/init.js but you may
+    override the location by starting Kami with the appropriate switches.
+
+    The init script will run with ROOT privileges and is supposed to set up all
+    required entities and invocations to run your game library. The init script
+    is also the only script intance that will be created with ROOT privileges 
+    by default and uses the driver itself as its associated entity.
+
+    After the init script was executed successfully the driver will enter the
+    running state and execute the "world loop" that takes care of e.g. calling
+    the heartbeat.
+
+    The init script can also be used to set specific driver hooks.
+
+SEE ALSO
+    concepts/privileges, concepts/entities, driver/hooks

@@ -1,0 +1,23 @@
+USAGE
+    kami [--lib=/usr/lib/kami/] [--init=/sys/init.js] [--log-level=INFO]
+
+DESCRIPTION
+    The driver is a simple binary dubbed "kami" that you can execute directly.
+    When executed it will boot the driver kernel and initialise it. The
+    following command line options are supported:
+
+    --lib=<LIBDIR>	use the given directory as basepath for all internal
+			library files (default: /usr/lib/kami/)
+
+    --init=<PATH>	the relative path of the init script that shall be used
+			(default: /sys/init.js)
+
+    --log-level=<LEVEL>	controls the level of logging information that wil be
+			displayed. Supported levels:
+				PANIC	errors that cause the driver to die
+				FATAL	errors that will have a major impact on
+					further processings
+				ERROR	all errors that occur (including scripts)
+				INFO	print additional infromation about 
+					internal states (default)
+				DEBUG	output for driver debugging output

@@ -1,0 +1,62 @@
+CONCEPT
+    Entities
+
+OVERVIEW
+    The game driver is heavily based on the concept of entities. In the
+    perception of the game driver an entity is a virtual object that 
+    exists in various stages throughout the game life cycle. It is very
+    much like an object in OOP.
+
+DESCRIPTION
+    The entity is one of the primary concepts of the driver. It is like
+    a virtual object that builds the container and context for all
+    executed scripts. Thus it provides meta information to the script processor
+    (like the privilege level) and also provides a container to store arbitary
+    information (see properties). Usually a script that is executed uses
+    "this" to refer to the related entity.
+
+    Example:
+        this.SetProp("something", 1);
+
+    Entities can interact with each other via specific script commands like
+    "call_other" and are supported as first-class citisens during scripting,
+    which essentially means that they can be passed as arguments to called
+    functions.
+
+    Their lifecycle usually begins by spawning them via the according dfun
+    (spawn). In the first step they will be created in three steps:
+        1. Allocate a new entity with its $uuid
+        2. Load the associated script by executing it
+        3. call the script function "$create" of the loaded script
+    After these steps are done and completed without error the entity is loaded
+    into the cache of the driver. It will usually stay there and be accessible
+    until the driver is instructed to destroy it again. Usually this is also
+    done by the appropriate dfun (destroy). When done so the driver will call
+    the script function "$destroy" if defined. After this the entity will be
+    marked as destroyed in the driver cache and thus cannot be referenced any
+    more. It will be unloaded with the next cache flush of the driver that 
+    occurrs in fixed intervals.
+
+SCRIPTING
+    Scripting an entity is done by implementing a script that defines some
+    predefined functions:
+
+        $create():     
+            This function is called when the entity is spawned. Each entity
+            _has_ to implent this function.
+
+        $destroy():    
+            Called when the driver is about th destruct the entity. TODO
+
+        $onShutdown(reason: string): 
+            The driver calls this function when it is about to shut down and be
+            stopped. If the function is not defined the driver will ignore it.
+
+        $tick():
+            Called for each driver heatbeat if implemented. (see heartbeat)
+
+    Code that is outside of functions will be interpreted when the entity
+    script is loaded.
+
+SEE ALSO
+    properties, scripting, heartbeat

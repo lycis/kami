@@ -1,0 +1,21 @@
+NAME
+    Driver Hooks
+
+DESCRIPTION
+    The Kami driver supports a variety of driver hooks that are used to hook
+    into differnt points of the driver execution. The are set by using the
+    dfun "set_driver_hook(hook: int, value)" and represent numerically where
+    each number refers to one specific hook. The value may vary between 
+    the different hooks so that one hook might expect to get a function pointer
+    while anther one expects strings or numbers.
+
+    1	(H_HB_ON_ERROR)		function_ptr that will be executed when an error
+				occurs within the heartbeat processing. Function
+                                signature has to be:
+					f(entity, error)
+
+    2	(H_WHEN_WORLD_RUN) 	function_ptr that will be executed when the world
+                                enters the "running" state but before the actual
+                                world loop was called. This indicates that the
+                                driver was initialised correctly. Function sig:
+					f()

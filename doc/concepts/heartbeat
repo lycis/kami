@@ -1,0 +1,13 @@
+CONCEPT
+    Heartbeat
+
+DESCRIPTION
+    The heratbeat is an internal interval that the driver uses to execute some
+    functionality within entities. By default the heartbeat will occur roughly
+    all 2 seconds. It is not necessarily fixed to that interval as the driver
+    may take a bit longer for working through internal tasks in each iteration.
+    It is guaranteed though that the timer takes at least 2 seconds by default.
+
+    When the heartbeat is executed it will call the $tick function for each
+    entity that is active and defines it.
+
