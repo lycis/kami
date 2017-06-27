@@ -1,0 +1,16 @@
+SYNPOSIS
+    call_other(id: string, func: string[,arg1, ...])
+
+DESCRIPTION
+    call_other is used as primary way for entites to interact
+    with each other. You can use to to invoke a function on
+    an entity by its UUID.
+
+    Example:
+        // set property "test" of remote entity to 1
+        call_other("some-uid", "SetProp", "test", 1);
+
+    It is also possible to retrieve returned values from other
+    entities:
+   
+        var name = call_other("uid", "GetProp", name);

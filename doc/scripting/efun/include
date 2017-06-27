@@ -1,0 +1,15 @@
+SYNOPSIS
+    include(file: string[, file2: string, ...])
+
+DESCRIPTION
+    You can use `include` to load and execute the content of a
+    different script file at the current position.
+
+    Example:
+        // inc.js
+        var myName = "World";
+
+        // actual.js
+        include("inc.js");
+        // will log `My name is World`
+        log("INFO", "My name is " + myName);

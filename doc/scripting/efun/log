@@ -1,0 +1,15 @@
+SYNOPSIS
+    log(level: string, message: string)
+
+DESCRIPTION
+    Write a message to the driver log.
+
+    Example:
+        log("INFO", "Some info message.");
+
+    The following log levels are supported:
+
+        DEBUG
+        INFO
+        WARN
+        FATAL
