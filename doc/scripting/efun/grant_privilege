@@ -1,0 +1,13 @@
+SYNPOSIS
+    grant_privilege(entity: (string|entity), level: int)
+
+DESCRIPTION
+    This function control the execution privileges of a script.
+    Usually a script will be executed with BASIC privileges, but 
+    you can change the privilege level by invoking this function.
+
+    You can not increase the privile lege not beyond that of the
+    script calling this function.
+
+SEE ALSO
+    scripting/privileges
