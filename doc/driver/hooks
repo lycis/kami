@@ -9,13 +9,17 @@ DESCRIPTION
     the different hooks so that one hook might expect to get a function pointer
     while anther one expects strings or numbers.
 
-    1	(H_HB_ON_ERROR)		function_ptr that will be executed when an error
+    0	(H_HB_ON_ERROR)		function_ptr that will be executed when an error
 				occurs within the heartbeat processing. Function
                                 signature has to be:
 					f(entity, error)
 
-    2	(H_WHEN_WORLD_RUN) 	function_ptr that will be executed when the world
+    1	(H_WHEN_WORLD_RUN) 	function_ptr that will be executed when the world
                                 enters the "running" state but before the actual
                                 world loop was called. This indicates that the
                                 driver was initialised correctly. Function sig:
-					f()
+   					f()
+
+   2	(H_NEW_USER)		function_ptr that will be executed when a new
+				user is connected to the game. Function signature:
+					f(user_entity)
