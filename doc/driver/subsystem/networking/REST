@@ -1,0 +1,76 @@
+NAME
+    REST Subsystem
+
+DESCRIPTION
+    The REST subsystem is a subsystem of the networking family that enables the
+    driver for external communication. Thus it is one way to communicate with
+    the driver from the "outside world" (e.g. from a frontend). 
+
+    Responses:
+        In general the REST interface returns "application/json" types and 
+        knows two status results:
+            200	OK			Request was processed without error
+            500 Internal Server Error	An error of some kind occurred. Refer
+					to the returned body for hints.
+
+        
+
+    The REST interface gives you the following resources to interact with:
+
+    /user
+        Method: PUT
+            Allocates a new user token and triggers the driver to know that
+            a new user requests access. This will call the driver hook
+            H_NEW_USER.
+            
+            Response Example
+                {"Token":"ac210c01-1f87-43de-5729-89ec3eac0c8b"}
+
+            Response Description
+                "Token" is the user token that has to be used when providing
+                user input or other types of reference to the user. 
+
+    /user/:token
+        Method: POST
+            Provides general input to the user object of some kind. The provided
+            data payload will directly be routed to the driver that will call
+            the according driver hook to process it for the according :token.
+ 
+            That means that it will call the driver hook for H_USER_INPUT with
+            the parameters :token and the payload. Imagine it like
+                H_USER_INPUT(:token, :payload)
+
+        Method: DELETE
+            Invalidates the given user token. This means that further interaction
+            with the token will not be possible. Internally H_USER_DELETE is 
+            called like
+                H_USER_DELETE(:token)
+
+    /user/:token/callback/:callback/
+        (see CALLBACK section for details)
+
+        Method: GET
+            Returns a list of all URLs registered for the given callback.
+
+        Method: PUT
+            Registers a given callback URL to be triggered when an event
+            happens at the user side.
+
+            Example Payload:
+                { "protocol": "rest", "url": "http://192.168.41.104/user_input/" }
+
+                protocol	protocol that should be used for callback
+				(currently supported: rest)
+
+                url		callback url to be called
+
+        Method: DELETE
+            Removes a callback URL. Supports the same payload parameters as PUT.
+            "protocol" is optional. If you do not provide it all callback URLs
+            that match the given one will be deleted regardless of their protocol
+
+            Example Payloads:
+                { "url": "http://192.168.41.104/user_input/" }
+
+    CALLBACK
+        TODO to be defined 

@@ -1,0 +1,14 @@
+NAME
+    Networking Subsystems
+
+DESCRIPTION
+    Subsystems of the networking family provide some way to interact with the
+    game driver. They usually provide some kind of network exposed interface
+    that you can do some or all of the following things:
+
+        1. Allocate new user tokens for providing user interaction
+        2. Operate the driver in some way (e.g. control sharding)
+        3. Retrieve statistics from the driver
+
+SEE ALSO
+    subsystems/networking/REST

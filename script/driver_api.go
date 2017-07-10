@@ -27,4 +27,7 @@ type DriverAPI interface {
 
 	// Shutdown is called when something wants the driver to stop.
 	Shutdown(reason string) error
+
+	// Enable or disable a driver subsystem
+	SetSubsystemState(stype int64, status bool) error
 }

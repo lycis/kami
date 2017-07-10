@@ -1,0 +1,11 @@
+NAME
+    Subsystems
+
+DESCRIPTION
+    The Kami driver supports various subsystems. A subsystem is a separate unit
+    that can be enabled or disabled by driver and runs in parallel. Different
+    subsystems take over different responsibilities. The key principle is that
+    they run detached from the driver and interact with it when needed.
+
+    Supported subsystems:
+        D_SUBSYSTEM_REST	0	REST endpoint subsystem (networking)

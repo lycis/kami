@@ -22,4 +22,14 @@ DESCRIPTION
 
    2	(H_NEW_USER)		function_ptr that will be executed when a new
 				user is connected to the game. Function signature:
-					f(user_entity)
+					f(): tokenString
+
+   3	(H_USER_INPUT)		function_ptr that will be called when input is
+				available for a user. signature:
+					H_USER_INPUT(userToken: string, input: string)
+
+   4	(H_USER_DELETE)		function_ptr to invalidate a user token. When the
+				according function is called it expected that
+				further user interaction will not be possible and
+				all resources of the user are deleted. signature:
+					H_USER_DLETE(userToken: string)

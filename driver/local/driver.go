@@ -4,8 +4,10 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/lycis/kami/driver"
+	"github.com/lycis/kami/driver/dfun"
 	"github.com/lycis/kami/entity"
 	"github.com/lycis/kami/script"
+	"github.com/lycis/kami/subsystem"
 	"github.com/robertkrimen/otto"
 	"reflect"
 	"runtime"
@@ -31,6 +33,8 @@ type LocalDriver struct {
 
 	// indicates whether world is running
 	running bool
+
+	restInterface subsystem.NetworkingInterface
 }
 
 // New generates a new driver instance that can be executed.
@@ -44,6 +48,7 @@ func New(libDir string) driver.Driver {
 		activeEntities:  make(map[string]*entity.Entity),
 		entityInstances: make(map[string][]*entity.Entity),
 		hooks:           make(map[int64]otto.Value),
+		restInterface:   nil,
 	}
 }
 
@@ -135,4 +140,68 @@ func (d *LocalDriver) forAllInstances(f func([]*entity.Entity)) {
 
 func getFunctionName(i interface{}) string {
 	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
+}
+
+func (d *LocalDriver) SetSubsystemState(stype int64, status bool) error {
+	d.Log.WithFields(log.Fields{"subsystem": stype, "status": status}).Debug("Changing subsystem state.")
+	switch stype {
+	case dfun.D_SUBSYSTEM_REST:
+		if status {
+			return d.enable_rest()
+		} else {
+			return d.disable_rest()
+		}
+	default:
+		return fmt.Errorf("driver does not support subsystem")
+	}
+}
+
+func (d LocalDriver) isRestEnabled() bool {
+	return d.restInterface != nil
+}
+
+func (d *LocalDriver) enable_rest() error {
+	if d.isRestEnabled() {
+		return fmt.Errorf("REST subsystem already enabled")
+	}
+
+	// TODO make configurable
+	d.restInterface = subsystem.CreateNetworkingInterface(subsystem.NWI_REST, "0.0.0.0", 8080)
+	d.restInterface.SetHandler(d)
+	return d.restInterface.Listen()
+}
+
+func (d *LocalDriver) disable_rest() error {
+	if !d.isRestEnabled() {
+		return nil
+	}
+
+	d.restInterface.Close()
+	d.restInterface = nil
+	return nil
+}
+
+// Provide a user token for new logins
+func (d *LocalDriver) UserTokenRequested(nwi subsystem.NetworkingInterface) (string, error) {
+	d.Log.Info("New user token requested.")
+	hv, ok := d.hooks[dfun.H_NEW_USER]
+	if !ok {
+		return "", fmt.Errorf("NEW_USER driver hook missing")
+	}
+
+	if !hv.IsFunction() {
+		return "", fmt.Errorf("NEW_USER driver hook has invalid type (expected: function)")
+	}
+
+	token, err := hv.Call(otto.ToValue(d))
+	if err != nil {
+		return "", err
+	}
+
+	strToken, err := token.ToString()
+	if err != nil {
+		return "", fmt.Errorf("NEW_USER driver hook did not return token string")
+	}
+
+	return strToken, nil
 }

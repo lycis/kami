@@ -19,6 +19,7 @@ import (
 const (
 	H_HB_ON_ERROR    = 0
 	H_WHEN_WORLD_RUN = 1
+	H_NEW_USER       = 2
 )
 
 type dfun_set_driver_hook struct {
