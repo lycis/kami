@@ -41,6 +41,8 @@ func (df dfun_enable_subsystem) Function() func(call otto.FunctionCall) otto.Val
 			panic(df.script.Vm().MakeSyntaxError("enable_subsystem(type: int[, options]): requires type to be integer"))
 		}
 
+		// TODO option passing
+
 		return change_subsystem(df.script.Driver(), *df.script.Vm(), ss_type, true)
 
 	}
