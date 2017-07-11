@@ -6,6 +6,7 @@ import (
 	"github.com/lycis/kami/privilege"
 	"github.com/robertkrimen/otto"
 	"path/filepath"
+	"sync"
 )
 
 // Everything that creates a script context should implement this interface
@@ -41,6 +42,7 @@ type ScriptContext struct {
 	driver         DriverAPI
 	privilegeLevel privilege.Level
 	creator        ContextCreator
+	runMtx         sync.Mutex
 }
 
 func ContextForScript(driver DriverAPI, script, libDir string, cache *ScriptCache) (ScriptContext, error) {
@@ -72,6 +74,8 @@ func (ctx *ScriptContext) Bind(vname string, value interface{}) {
 // RunScrupt executes the script given from the path relative
 // to the drivers library directory.
 func (ctx *ScriptContext) RunScript(rpath string) error {
+	defer ctx.runMtx.Unlock()
+	ctx.runMtx.Lock()
 	content, err := ctx.LoadScript(rpath)
 	if err != nil {
 		return kerror.ToError(err)
@@ -113,6 +117,8 @@ func (ctx ScriptContext) LoadScript(path string) (string, error) {
 }
 
 func (ctx ScriptContext) Call(name string, this interface{}, args ...interface{}) (otto.Value, error) {
+	defer ctx.runMtx.Unlock()
+	ctx.runMtx.Lock()
 	return ctx.vm.Call(name, this, args...)
 }
 

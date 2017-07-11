@@ -107,7 +107,7 @@ func (d *LocalDriver) Shutdown(reason string) error {
 				if err := recover(); err != nil {
 					xerr, ok := err.(entity.FunctionInvocationError)
 					if ok {
-						d.Log.WithField("entity", fmt.Sprintf("%s#%s", xerr.Entity.GetProp(entity.P_SYS_PATH), xerr.Entity.GetProp(entity.P_SYS_PATH))).WithError(xerr.Error).Error("Calling heratbeat error hook failed")
+						d.Log.WithField("entity", fmt.Sprintf("%s#%s", xerr.Entity.GetProp(entity.P_SYS_PATH), xerr.Entity.GetProp(entity.P_SYS_PATH))).WithError(xerr.Err).Error("Calling heratbeat error hook failed")
 					} else {
 						d.Log.WithError(err.(error)).Warn("Error in shutdown processing of unknown entity.")
 					}
@@ -184,24 +184,62 @@ func (d *LocalDriver) disable_rest() error {
 // Provide a user token for new logins
 func (d *LocalDriver) UserTokenRequested(nwi subsystem.NetworkingInterface) (string, error) {
 	d.Log.Info("New user token requested.")
-	hv, ok := d.hooks[dfun.H_NEW_USER]
-	if !ok {
-		return "", fmt.Errorf("NEW_USER driver hook missing")
-	}
-
-	if !hv.IsFunction() {
-		return "", fmt.Errorf("NEW_USER driver hook has invalid type (expected: function)")
-	}
-
-	token, err := hv.Call(otto.ToValue(d))
+	hv, err := d.getHookFuncCallable(dfun.H_NEW_USER)
 	if err != nil {
+		log.WithFields(log.Fields{"hook": "H_NEW_USER"}).WithError(err).Error("User token could not be provided. Driver Hook error.")
+		return "", err
+	}
+
+	token, err := hv.Call(otto.UndefinedValue())
+	if err != nil {
+		log.WithError(err).Error("User token not provided. Error when calling javascript function for H_NEW_USER.")
 		return "", err
 	}
 
 	strToken, err := token.ToString()
 	if err != nil {
+		log.Error("User token not provided. H_NEW_USER hook did not return token string")
 		return "", fmt.Errorf("NEW_USER driver hook did not return token string")
 	}
 
+	log.WithFields(log.Fields{"token": strToken}).Info("User token provided.")
 	return strToken, nil
+}
+
+func (d *LocalDriver) UserInputProvided(nwi subsystem.NetworkingInterface, token, input string) error {
+	d.Log.WithFields(log.Fields{"token": token}).Info("User input provided.")
+	hv, err := d.getHookFuncCallable(dfun.H_USER_INPUT)
+	if err != nil {
+		log.WithError(err).Error("Processing user input failed.")
+		return err
+	}
+
+	successV, err := hv.Call(otto.UndefinedValue(), token, input)
+	if err != nil {
+		return err
+	}
+
+	success, err := successV.ToBoolean()
+	if err != nil {
+		return err
+	}
+
+	if !success {
+		return fmt.Errorf("H_USER_INPUT failed. See driver log for details.")
+	}
+
+	return nil
+}
+
+func (d LocalDriver) getHookFuncCallable(hook int64) (otto.Value, error) {
+	hv, ok := d.hooks[hook]
+	if !ok {
+		return otto.UndefinedValue(), fmt.Errorf("driver hook %d not set", hook)
+	}
+
+	if !hv.IsFunction() {
+		return otto.UndefinedValue(), fmt.Errorf("driver hook %d has invalid type (expected: function)", hook)
+	}
+
+	return hv, nil
 }

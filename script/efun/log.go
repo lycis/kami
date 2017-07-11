@@ -49,6 +49,8 @@ func (e *efunLog) Function() func(call otto.FunctionCall) otto.Value {
 			fun = l.Warn
 		case "FATAL":
 			fun = l.Fatal
+		case "ERROR":
+			fun = l.Error
 		default:
 			panic(e.script.Vm().MakeSyntaxError("log(level: string, message: string): invalid level"))
 		}

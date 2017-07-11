@@ -11,5 +11,6 @@ DESCRIPTION
 
         DEBUG
         INFO
+        ERROR
         WARN
         FATAL

@@ -24,6 +24,8 @@ func main() {
 	l := log.New()
 	l.Level = stringToLogLevel(*logLevel)
 	l.Out = os.Stdout
+	log.SetOutput(os.Stdout)
+	log.SetLevel(stringToLogLevel(*logLevel))
 
 	mainDriver := local.New(*libDir)
 	mainDriver.SetLogger(l)

@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/lycis/kami/kerror"
 	"github.com/lycis/kami/privilege"
@@ -9,14 +10,22 @@ import (
 )
 
 type FunctionInvocationError struct {
-	Error  error
+	Err    error
 	Entity *Entity
+}
+
+func (f FunctionInvocationError) Error() string {
+	return fmt.Sprintf(
+		"function invocation failed (error: %s entity: %s)",
+		f.Err.Error(),
+		fmt.Sprintf("%s#%s", f.Entity.GetProp(P_SYS_PATH), f.Entity.GetProp(P_SYS_ID)))
 }
 
 // Entity represents any in-game object that exists
 type Entity struct {
-	properties map[string]interface{}
-	mutex      sync.Mutex
+	properties  map[string]interface{}
+	propMutex   sync.RWMutex
+	scriptMutex sync.Mutex
 
 	script script_context_api
 }
@@ -38,28 +47,45 @@ func NewEntity() *Entity {
 }
 
 func (e *Entity) Create(script script_context_api) error {
+	defer e.scriptMutex.Unlock()
+	e.scriptMutex.Lock()
+
 	e.script = script
 	_, err := e.script.Call("$create", e)
 	return err
 }
 
-func (e *Entity) Heartbeat() {
+func (e *Entity) Heartbeat() error {
+	defer e.scriptMutex.Unlock()
+	e.scriptMutex.Lock()
+
 	f, err := e.script.GetFunction("$tick")
 	if err != nil {
 		log.WithError(kerror.ToError(err)).WithFields(log.Fields{"path": e.GetProp("$path"), "uuid": e.GetProp("$uuid")}).Error("Executing tick function failed.")
-		panic(FunctionInvocationError{err, e})
+		return FunctionInvocationError{err, e}
 	}
 
 	if f.IsDefined() {
-		_, err := e.script.Call("$tick", e)
+		this, err := e.script.Vm().ToValue(e)
 		if err != nil {
 			log.WithError(kerror.ToError(err)).WithFields(log.Fields{"path": e.GetProp("$path"), "uuid": e.GetProp("$uuid")}).Error("Executing tick function failed.")
-			panic(FunctionInvocationError{err, e})
+			return FunctionInvocationError{err, e}
+		}
+
+		_, err = f.Call(this)
+		if err != nil {
+			log.WithError(kerror.ToError(err)).WithFields(log.Fields{"path": e.GetProp("$path"), "uuid": e.GetProp("$uuid")}).Error("Executing tick function failed.")
+			return FunctionInvocationError{err, e}
 		}
 	}
+
+	return nil
 }
 
 func (e *Entity) OnShutdown(reason string) {
+	defer e.scriptMutex.Unlock()
+	e.scriptMutex.Lock()
+
 	f, err := e.script.GetFunction("$onShutdown")
 	if err != nil {
 		log.WithError(kerror.ToError(err)).WithFields(log.Fields{"path": e.GetProp("$path"), "uuid": e.GetProp("$uuid")}).Error("Executing $onShutdown function failed.")
@@ -76,6 +102,8 @@ func (e *Entity) OnShutdown(reason string) {
 }
 
 func (e *Entity) Call(funName string, args ...interface{}) (otto.Value, error) {
+	defer e.scriptMutex.Unlock()
+	e.scriptMutex.Lock()
 	return e.script.Call(funName, e, args...)
 }
 
