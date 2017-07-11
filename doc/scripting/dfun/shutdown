@@ -1,0 +1,11 @@
+SYNPOSIS
+    shutdown(reason: string)
+
+DESCRIPTION
+    Causes the driver to shut down with the given reason.
+
+    All active entities will be informed of the shutdown by calling their
+    $onShutdown function if defined.
+
+    Executing the shutdown function requires the executing entity to have
+    ROOT privileges.

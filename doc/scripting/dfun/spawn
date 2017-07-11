@@ -1,0 +1,9 @@
+SYNOPSIS
+    spawn(script, exclusive: boolean=flase)
+
+DESCRIPTION
+    spawn creates a new entity from a given script. The $create() method of
+    the script will be invoked on entity creation and should be used to set
+     properties or execute arbitary code on entity creation.
+
+     To create an exclusive entity set the "exclusive" parameter to true.

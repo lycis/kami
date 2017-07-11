@@ -64,7 +64,7 @@ func change_subsystem(driver script.DriverAPI, vm otto.Otto, ss_type int64, stat
 }
 
 // syntax:
-//   enable_subsystem(type: int[, options])
+//   disable_subsystem(type: int)
 //
 // enable_subsystem is used to turn on a driver subsystem. Optionally
 // you can pass options to it, if they are supported.

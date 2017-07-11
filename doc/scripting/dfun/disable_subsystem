@@ -1,0 +1,11 @@
+SYNOPSIS
+    disable_subsystem(subsystem: int): bool
+
+DESCRIPTION
+    This is the counterpart to enable_subsystem. It turns off a previously
+    enabled subsystem.
+
+    If disabling was successful it will return true and false if not.
+
+SEE ALSO
+    driver/subsystems, enable_subsystem

@@ -1,0 +1,11 @@
+SYNOPSIS
+    enable_subsystem(type: int[, options]): bool
+
+DESCRIPTION
+    enable_subsystem is used to turn on a driver subsystem. Optionally
+    you can pass options to it, if they are supported.
+
+    Returns true if the subsystem could be enabled.
+
+SEE ALSO
+    driver/subsystems, disable_subsystem

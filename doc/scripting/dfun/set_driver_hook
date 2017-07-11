@@ -1,0 +1,19 @@
+SYNPOSIS
+    set_driver_hook(hook: int, value)
+
+DESCRIPTION
+    Used to set a driver hook. The hook is identified by its integer
+    value and the hook value might be any arbitary type depending on
+    the hook to set.
+
+    Deleting a driver hook is done by setting it to 'undef'.
+
+EXAMPLE
+    set_driver_hook(3, processUserInput);
+
+    function processUserInput(token, input) {
+       ...
+    }
+
+SEE ALSO
+    driver/hooks

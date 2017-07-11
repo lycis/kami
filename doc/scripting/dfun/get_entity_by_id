@@ -1,0 +1,7 @@
+SYNPOSIS
+    get_entity_by_id(id: string)
+
+DESCRIPTION
+    This function is used to get the entity that is referred to by the
+    givein ID. If the ID is not mapped to any entity it will simply return
+    undefined.
