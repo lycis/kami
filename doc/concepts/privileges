@@ -1,0 +1,39 @@
+NAME
+    Privileges
+
+DESCRIPTION
+    Within the game driver each entity that runs a script has a ertain privilege
+    level attached. This level indicates which parts of the scripting API are
+    allowed to be used by this entity.
+
+    The privilege levels range from numerical 0 through 10. Currently only
+    three levels are used:
+        
+        0	None	No script API access
+	1	Basic	Access to non-critical functions
+	10	Root	Access to all (including critical) functions
+
+    Basically a script gets access to all functions that its privilege level
+    allows. Functions of a higher level are simply not available. For example
+    when trying to call 'shutdown("being naughty");' from an entity script
+    that is executed with privilege level 1 (Basic) you will get an error because
+    'shutdown' is not defined for this script. If you execute the same script
+    with a privilege level 10 (Root) the driver will shutdown.
+
+    Usually every entity has the Basic (1) privilege level. You can control the
+    level by using the 'grant_privilege(...)' function but you are not allowed
+    to grant a higher privilege level than the script executing the function has.
+
+    For example if you execute 'grant_privilege(<uid>, 10);' within a script
+    that only has privilege level 1 (Basic) itself the call will fail. If you
+    execute the same snippet from a script with Root privileges (e.g. the
+    init-script) it will suceed and elevate the target entity to Root privileges.
+
+    By default the only entity that has Root (10) privilege by default is the
+    game driver itself. So to pass this privilege onwards you have to 
+    'grant_privilege' according entities from within the init-script that is
+    executed on startup.
+
+SEE ALSO
+    driver/initialisation    
+    

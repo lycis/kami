@@ -1,0 +1,28 @@
+NAME
+    Driver Intiailisation
+
+DESCRIPTION
+    When the game driver starts it is initialised by executing the so called
+    'init script'. The relative path within the driver sytem libraries is passed
+    via the '--init=<path>' command line option on startup and by default is
+    assumed to be '/system/init.js'.
+
+    The initialisation flow is
+
+        1. Set driver basics (e.g. logging levels, input folders and files, ...)
+        2. Load and compile init script
+        3. Execute init script
+        4. Start world loop
+
+    The most important part here is the loading and execution of the init script.
+    This the basic entry point that you have to define the game engine behaviour
+    as it is expected to set up the complete game library and world. For example
+    it is supposed to set according driver hooks to allow user interaction and
+    instantiate entities that will manage the game flow.
+
+    The init script itself will be executed with Root privileges. So any code
+    that you define in there will be able to access the most critical driver
+    functions.
+
+    The driver will shut down if an error occurs within the initialisation
+    script.
