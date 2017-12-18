@@ -9,11 +9,15 @@ import (
 	"time"
 )
 
-func (driver *LocalDriver) RunWorld() {
+// RunWorld is the actual world loop for the local driver. It will pause about
+// 10 msec after every run.
+// TODO Improve... maybe use events and channels to run world loop only when
+// required and get rid of the pausing
+func (driver *Driver) RunWorld() {
 	driver.running = true
 
-	if hook_func, hook_set := driver.hooks[dfun.H_WHEN_WORLD_RUN]; hook_set {
-		hook_func.Call(otto.UndefinedValue())
+	if hookFunc, hookSet := driver.hooks[dfun.H_WHEN_WORLD_RUN]; hookSet {
+		hookFunc.Call(otto.UndefinedValue())
 	}
 
 	for driver.running {
@@ -26,7 +30,7 @@ func (driver *LocalDriver) RunWorld() {
 	}
 }
 
-func (driver *LocalDriver) heartbeat() {
+func (driver *Driver) heartbeat() {
 	var hbWg sync.WaitGroup
 	for path, instances := range driver.entityInstances {
 		driver.Log.WithField("path", path).Debug("Calling heartbeat for instance shard.")
@@ -40,19 +44,19 @@ func (driver *LocalDriver) heartbeat() {
 	driver.lastHeartbeat = time.Now()
 }
 
-func (driver *LocalDriver) doHeartbeatForShard(instances []*entity.Entity, hbWg *sync.WaitGroup) {
+func (driver *Driver) doHeartbeatForShard(instances []*entity.Entity, hbWg *sync.WaitGroup) {
 	for _, e := range instances {
 		//driver.Log.WithField("uuid", e.GetProp("$uuid")).Debug("Calling Heartbeat")
 		go func() {
 			defer hbWg.Done()
 			if err := e.Heartbeat(); err != nil {
 				hberror := err.(entity.FunctionInvocationError)
-				if hb_err_func, ok := driver.hooks[dfun.H_HB_ON_ERROR]; ok {
+				if hbErrFunc, ok := driver.hooks[dfun.H_HB_ON_ERROR]; ok {
 					ovEntity, err := hberror.Entity.Context().Vm().ToValue(hberror.Entity)
 					if err != nil {
 						driver.Log.WithField("entity", fmt.Sprintf("%s#%s", hberror.Entity.GetProp(entity.P_SYS_PATH), hberror.Entity.GetProp(entity.P_SYS_PATH))).WithError(hberror.Err).Error("Calling heratbeat error hook failed")
 					}
-					hb_err_func.Call(ovEntity, hberror.Error())
+					hbErrFunc.Call(ovEntity, hberror.Error())
 				}
 			}
 		}()

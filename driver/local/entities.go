@@ -8,7 +8,9 @@ import (
 	"github.com/nu7hatch/gouuid"
 )
 
-func (driver *LocalDriver) SpawnExclusive(rpath string, creator script.ContextCreator) (*entity.Entity, error) {
+// SpawnExclusive will spawn an exclusive entity. It will not be possible to
+// create instances of this entity as long as it is exclusively spawned.
+func (driver *Driver) SpawnExclusive(rpath string, creator script.ContextCreator) (*entity.Entity, error) {
 	// TODO check if instances exist
 
 	e, err := driver.createEntityInstance(rpath)
@@ -24,7 +26,7 @@ func (driver *LocalDriver) SpawnExclusive(rpath string, creator script.ContextCr
 }
 
 // SpawnEntity loads and spawns an entity from the given script path
-func (driver *LocalDriver) SpawnEntity(rpath string, creator script.ContextCreator) (*entity.Entity, error) {
+func (driver *Driver) SpawnEntity(rpath string, creator script.ContextCreator) (*entity.Entity, error) {
 	// TODO check if exclusive entity exists
 
 	e, err := driver.createEntityInstance(rpath)
@@ -44,7 +46,7 @@ func (driver *LocalDriver) SpawnEntity(rpath string, creator script.ContextCreat
 	return e, nil
 }
 
-func (driver *LocalDriver) createEntityInstance(rpath string) (*entity.Entity, error) {
+func (driver *Driver) createEntityInstance(rpath string) (*entity.Entity, error) {
 	ctx := script.NewContext(driver, driver.LibraryDir(), &driver.scriptCache)
 	ctx.GrantPrivilege(privilege.PrivilegeBasic)
 	if err := ctx.RunScript(rpath); err != nil {
@@ -63,7 +65,7 @@ func (driver *LocalDriver) createEntityInstance(rpath string) (*entity.Entity, e
 	return e, nil
 }
 
-func (driver *LocalDriver) registerEntity(e *entity.Entity) {
+func (driver *Driver) registerEntity(e *entity.Entity) {
 	driver.entityListMutex.Lock()
 	defer driver.entityListMutex.Unlock()
 	id := e.GetProp(entity.P_SYS_ID).(string)

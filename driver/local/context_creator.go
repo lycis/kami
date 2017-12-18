@@ -7,10 +7,10 @@ import (
 
 // implementation of the context creator interface
 
-func (d LocalDriver) GetScriptPrivilegeLevel() privilege.Level {
+func (d Driver) GetScriptPrivilegeLevel() privilege.Level {
 	return privilege.PrivilegeRoot
 }
 
-func (d LocalDriver) GetScriptReferenceEntity() *entity.Entity {
+func (d Driver) GetScriptReferenceEntity() *entity.Entity {
 	return nil
 }

@@ -17,7 +17,7 @@ import (
 
 // Driver represents the overall game driver state and driver base functions
 // It takes care of loading and executing the game world
-type LocalDriver struct {
+type Driver struct {
 	libraryDir        string
 	Log               *log.Logger
 	scriptCache       script.ScriptCache
@@ -41,7 +41,7 @@ type LocalDriver struct {
 // The libDir tells the driver where to search for scripts and programs
 // to be executed.
 func New(libDir string) driver.Driver {
-	return &LocalDriver{
+	return &Driver{
 		libraryDir:      libDir,
 		Log:             log.New(),
 		scriptCache:     script.NewCache(),
@@ -55,7 +55,7 @@ func New(libDir string) driver.Driver {
 // SetLogger gives the driver a logger that all output will
 // be written to. If this is not set it will by default use
 // the default logger (usually stdout)
-func (d *LocalDriver) SetLogger(l *log.Logger) {
+func (d *Driver) SetLogger(l *log.Logger) {
 	if l == nil {
 		return
 	}
@@ -63,19 +63,24 @@ func (d *LocalDriver) SetLogger(l *log.Logger) {
 	d.Log = l
 }
 
-func (d LocalDriver) LibraryDir() string {
+// LibraryDir tells where to find the game library
+func (d Driver) LibraryDir() string {
 	return d.libraryDir
 }
 
-func (d LocalDriver) Logger() *log.Logger {
+// Logger gives the currently used logger of that driver
+func (d Driver) Logger() *log.Logger {
 	return d.Log
 }
 
-func (d LocalDriver) GetEntityById(id string) *entity.Entity {
+// GetEntityById will return an entity reference for the according ID.
+// If none was found we'll get nil.
+func (d Driver) GetEntityById(id string) *entity.Entity {
 	return d.activeEntities[id]
 }
 
-func (d *LocalDriver) SetHook(hook int64, value interface{}) error {
+// SetHook will set the hook to the according value for the local driver.
+func (d *Driver) SetHook(hook int64, value interface{}) error {
 	ov, ok := value.(otto.Value)
 	if !ok {
 		return fmt.Errorf("local driver only supports javascript function calls")
@@ -89,7 +94,10 @@ func (d *LocalDriver) SetHook(hook int64, value interface{}) error {
 	return nil
 }
 
-func (d *LocalDriver) Shutdown(reason string) error {
+// Shutdown kills the driver with the given reason message.
+// It will notify all active entities of the shutdown and will only continue
+// when all have processed this notification
+func (d *Driver) Shutdown(reason string) error {
 	if !d.running {
 		return fmt.Errorf("world not in running state")
 	}
@@ -129,7 +137,7 @@ func (d *LocalDriver) Shutdown(reason string) error {
 	return nil
 }
 
-func (d *LocalDriver) forAllInstances(f func([]*entity.Entity)) {
+func (d *Driver) forAllInstances(f func([]*entity.Entity)) {
 	for path, instances := range d.entityInstances {
 		d.Log.WithFields(log.Fields{"path": path, "function": getFunctionName(f)}).Debug("Calling function for instance shard.")
 		go func() {
@@ -142,25 +150,27 @@ func getFunctionName(i interface{}) string {
 	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 }
 
-func (d *LocalDriver) SetSubsystemState(stype int64, status bool) error {
+// SetSubsystemState modifies the state of a subsystem. Mainly this
+// means activating or deactivating it.
+func (d *Driver) SetSubsystemState(stype int64, status bool) error {
 	d.Log.WithFields(log.Fields{"subsystem": stype, "status": status}).Debug("Changing subsystem state.")
 	switch stype {
 	case dfun.D_SUBSYSTEM_REST:
 		if status {
-			return d.enable_rest()
-		} else {
-			return d.disable_rest()
+			return d.enableRest()
 		}
+
+		return d.disableRest()
 	default:
 		return fmt.Errorf("driver does not support subsystem")
 	}
 }
 
-func (d LocalDriver) isRestEnabled() bool {
+func (d Driver) isRestEnabled() bool {
 	return d.restInterface != nil
 }
 
-func (d *LocalDriver) enable_rest() error {
+func (d *Driver) enableRest() error {
 	if d.isRestEnabled() {
 		return fmt.Errorf("REST subsystem already enabled")
 	}
@@ -171,7 +181,7 @@ func (d *LocalDriver) enable_rest() error {
 	return d.restInterface.Listen()
 }
 
-func (d *LocalDriver) disable_rest() error {
+func (d *Driver) disableRest() error {
 	if !d.isRestEnabled() {
 		return nil
 	}
@@ -181,8 +191,8 @@ func (d *LocalDriver) disable_rest() error {
 	return nil
 }
 
-// Provide a user token for new logins
-func (d *LocalDriver) UserTokenRequested(nwi subsystem.NetworkingInterface) (string, error) {
+// UserTokenRequested provides a user token for new logins
+func (d *Driver) UserTokenRequested(nwi subsystem.NetworkingInterface) (string, error) {
 	d.Log.Info("New user token requested.")
 	hv, err := d.getHookFuncCallable(dfun.H_NEW_USER)
 	if err != nil {
@@ -206,7 +216,9 @@ func (d *LocalDriver) UserTokenRequested(nwi subsystem.NetworkingInterface) (str
 	return strToken, nil
 }
 
-func (d *LocalDriver) UserInputProvided(nwi subsystem.NetworkingInterface, token, input string) error {
+// UserInputProvided is called whenever a new user input has arrived and will
+// notify the according driver hook,
+func (d *Driver) UserInputProvided(nwi subsystem.NetworkingInterface, token, input string) error {
 	d.Log.WithFields(log.Fields{"token": token}).Info("User input provided.")
 	hv, err := d.getHookFuncCallable(dfun.H_USER_INPUT)
 	if err != nil {
@@ -225,13 +237,13 @@ func (d *LocalDriver) UserInputProvided(nwi subsystem.NetworkingInterface, token
 	}
 
 	if !success {
-		return fmt.Errorf("H_USER_INPUT failed. See driver log for details.")
+		return fmt.Errorf("H_USER_INPUT failed. See driver log for details")
 	}
 
 	return nil
 }
 
-func (d LocalDriver) getHookFuncCallable(hook int64) (otto.Value, error) {
+func (d Driver) getHookFuncCallable(hook int64) (otto.Value, error) {
 	hv, ok := d.hooks[hook]
 	if !ok {
 		return otto.UndefinedValue(), fmt.Errorf("driver hook %d not set", hook)
