@@ -2,7 +2,7 @@ package script
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/lycis/kami/entity"
+	"gitlab.com/lycis/kami/entity"
 )
 
 type DriverAPI interface {

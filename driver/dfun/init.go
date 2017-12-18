@@ -1,6 +1,6 @@
 package dfun
 
-import "github.com/lycis/kami/script"
+import "gitlab.com/lycis/kami/script"
 
 func init() {
 	script.ExposeFunction("spawn", create_dfun_spawn)

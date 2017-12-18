@@ -1,7 +1,7 @@
 package script
 
 import (
-	"github.com/lycis/kami/privilege"
+	"gitlab.com/lycis/kami/privilege"
 	"github.com/robertkrimen/otto"
 )
 

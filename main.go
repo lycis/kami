@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"github.com/lycis/kami/driver/local"
+	"gitlab.com/lycis/kami/driver/local"
 	flag "github.com/ogier/pflag"
 	"os"
 	"strings"
 
 	// import for side effect of registering functions
-	_ "github.com/lycis/kami/driver/dfun"
-	_ "github.com/lycis/kami/script/efun"
+	_ "gitlab.com/lycis/kami/driver/dfun"
+	_ "gitlab.com/lycis/kami/script/efun"
 )
 
 func main() {

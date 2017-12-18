@@ -3,8 +3,8 @@ package local
 import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"github.com/lycis/kami/privilege"
-	"github.com/lycis/kami/script"
+	"gitlab.com/lycis/kami/privilege"
+	"gitlab.com/lycis/kami/script"
 	"os"
 	"time"
 )

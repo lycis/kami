@@ -1,9 +1,9 @@
 package script
 
 import (
-	"github.com/lycis/kami/entity"
-	"github.com/lycis/kami/kerror"
-	"github.com/lycis/kami/privilege"
+	"gitlab.com/lycis/kami/entity"
+	"gitlab.com/lycis/kami/kerror"
+	"gitlab.com/lycis/kami/privilege"
 	"github.com/robertkrimen/otto"
 	"path/filepath"
 	"sync"

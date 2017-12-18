@@ -1,10 +1,10 @@
 package efun
 
 import (
-	"github.com/lycis/kami/kerror"
-	"github.com/lycis/kami/script"
+	"gitlab.com/lycis/kami/kerror"
+	"gitlab.com/lycis/kami/script"
 	"github.com/robertkrimen/otto"
-	"github.com/lycis/kami/privilege"
+	"gitlab.com/lycis/kami/privilege"
 )
 
 type efunCallOther struct {

@@ -1,8 +1,8 @@
 package efun
 
 import (
-	"github.com/lycis/kami/privilege"
-	"github.com/lycis/kami/script"
+	"gitlab.com/lycis/kami/privilege"
+	"gitlab.com/lycis/kami/script"
 	"github.com/robertkrimen/otto"
 	"strings"
 )

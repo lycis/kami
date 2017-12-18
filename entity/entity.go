@@ -3,8 +3,8 @@ package entity
 import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"github.com/lycis/kami/kerror"
-	"github.com/lycis/kami/privilege"
+	"gitlab.com/lycis/kami/kerror"
+	"gitlab.com/lycis/kami/privilege"
 	"github.com/robertkrimen/otto"
 	"sync"
 )

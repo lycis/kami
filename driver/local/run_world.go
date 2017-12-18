@@ -2,8 +2,8 @@ package local
 
 import (
 	"fmt"
-	"github.com/lycis/kami/driver/dfun"
-	"github.com/lycis/kami/entity"
+	"gitlab.com/lycis/kami/driver/dfun"
+	"gitlab.com/lycis/kami/entity"
 	"github.com/robertkrimen/otto"
 	"sync"
 	"time"

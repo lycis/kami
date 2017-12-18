@@ -1,10 +1,10 @@
 package dfun
 
 import (
-	"github.com/lycis/kami/entity"
-	"github.com/lycis/kami/kerror"
-	"github.com/lycis/kami/privilege"
-	"github.com/lycis/kami/script"
+	"gitlab.com/lycis/kami/entity"
+	"gitlab.com/lycis/kami/kerror"
+	"gitlab.com/lycis/kami/privilege"
+	"gitlab.com/lycis/kami/script"
 	"github.com/robertkrimen/otto"
 )
 

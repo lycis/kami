@@ -1,8 +1,8 @@
 package local
 
 import (
-	"github.com/lycis/kami/entity"
-	"github.com/lycis/kami/privilege"
+	"gitlab.com/lycis/kami/entity"
+	"gitlab.com/lycis/kami/privilege"
 )
 
 // implementation of the context creator interface

@@ -2,7 +2,7 @@ package driver
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/lycis/kami/script"
+	"gitlab.com/lycis/kami/script"
 )
 
 // Driver represents the overall game driver state and driver base functions
