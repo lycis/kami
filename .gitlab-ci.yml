@@ -1,0 +1,33 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+variables:
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+
+stages:
+  - build
+  - test
+  - push
+
+before_script:
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
+build-gatekeeper:
+  stage: build
+  script:
+    - docker build -t $IMAGE_TAG-untested .
+    - docker push $IMAGE_TAG-untested
+
+test-gatekeeper:
+  stage: test
+  script:
+    - echo TODO
+
+push-verified:
+  stage: push
+  script:
+    - docker pull $IMAGE_TAG-untested
+    - docker tag $IMAGE_TAG-untested $IMAGE_TAG
+    - docker push $IMAGE_TAG

@@ -18,6 +18,18 @@ function newUserToken() {
 	return shell.GetProp("$uuid")
 }
 
+function invalidateToken(token) {
+    log("DEBUG", "removing token");
+    shell = get_entity_by_id(token);
+    if(shell === undefined) {
+        log("ERROR", "user with the given token is unknown");
+        return false;
+    }
+
+    // TODO destroy entity
+    call_other(token, "SetProp", "disabled", true);
+}
+
 function processUserInput(token, input) {
     log("INFO", "processUserInput(" + token + ", " + input + ")");
     shell = get_entity_by_id(token);

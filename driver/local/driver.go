@@ -176,7 +176,7 @@ func (d *Driver) enableRest() error {
 	}
 
 	// TODO make configurable
-	d.restInterface = subsystem.CreateNetworkingInterface(subsystem.NWI_REST, "0.0.0.0", 8080)
+	d.restInterface = subsystem.CreateNetworkingInterface(subsystem.InterfaceREST, "0.0.0.0", 8080)
 	d.restInterface.SetHandler(d)
 	return d.restInterface.Listen()
 }
@@ -214,6 +214,33 @@ func (d *Driver) UserTokenRequested(nwi subsystem.NetworkingInterface) (string, 
 
 	log.WithFields(log.Fields{"token": strToken}).Info("User token provided.")
 	return strToken, nil
+}
+
+// InvalidateUserToken will call the driver hook H_USER_DELETE to inform the hosted
+// system that a user token has to be invalidated
+func (d *Driver) InvalidateUserToken(nwi subsystem.NetworkingInterface, token string) error {
+	d.Log.WithField("token", token).Info("Invalidating user token")
+	hv, err := d.getHookFuncCallable(dfun.H_USER_DELETE)
+	if err != nil {
+		log.WithFields(log.Fields{"hook": "H_USER_DELETE"}).WithError(err).Error("Loading H_USER_DELETE driver hook failed.")
+		return err
+	}
+
+	successValue, err := hv.Call(otto.UndefinedValue(), token)
+	if err != nil {
+		return err
+	}
+
+	success, err := successValue.ToBoolean()
+	if err != nil {
+		return err
+	}
+
+	if !success {
+		return fmt.Errorf("H_USER_DELETE failed. See driver log for details.")
+	}
+
+	return nil
 }
 
 // UserInputProvided is called whenever a new user input has arrived and will

@@ -7,12 +7,12 @@ import (
 	"regexp"
 )
 
-type nwi_rest struct {
+type nwiRest struct {
 	iface   string
 	handler NetworkRequestHandler
 }
 
-func (nwi *nwi_rest) HandleUser(w http.ResponseWriter, r *http.Request) {
+func (nwi *nwiRest) HandleUser(w http.ResponseWriter, r *http.Request) {
 	subpath := r.URL.Path[len("/user"):]
 	if len(subpath) <= 0 {
 		subpath = "/"
@@ -31,14 +31,35 @@ func (nwi *nwi_rest) HandleUser(w http.ResponseWriter, r *http.Request) {
 
 	if rex.MatchString(subpath) {
 		token := rex.FindStringSubmatch(subpath)
-		nwi.UserInput(w, r, token[1])
+		switch(r.Method) {
+		case http.MethodPost:
+			nwi.UserInput(w, r, token[1])
+		case http.MethodDelete:
+			nwi.DeleteToken(w, r, token[1])
+		default:
+			http.Error(w, "", http.StatusMethodNotAllowed)
+		}
 		return
 	}
 
 	http.Error(w, "", http.StatusNotFound)
 }
 
-func (nwi *nwi_rest) UserInput(w http.ResponseWriter, r *http.Request, token string) {
+func (nwi *nwiRest) DeleteToken(w http.ResponseWriter, r *http.Request, token string) {
+	if len(token) < 1 {
+		http.Error(w, "invalid token", http.StatusBadRequest)
+		return
+	}
+
+	if err := nwi.handler.InvalidateUserToken(nwi, token); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+}
+
+func (nwi *nwiRest) UserInput(w http.ResponseWriter, r *http.Request, token string) {
 	defer r.Body.Close()
 	if r.Method != http.MethodPost {
 		http.Error(w, "", http.StatusMethodNotAllowed)
@@ -57,7 +78,7 @@ func (nwi *nwi_rest) UserInput(w http.ResponseWriter, r *http.Request, token str
 	}
 
 	if len(payload) < 1 {
-		http.Error(w, "no payload given", http.StatusInternalServerError)
+		http.Error(w, "no payload given", http.StatusBadRequest)
 		return
 	}
 
@@ -69,7 +90,7 @@ func (nwi *nwi_rest) UserInput(w http.ResponseWriter, r *http.Request, token str
 	w.WriteHeader(http.StatusAccepted)
 }
 
-func (nwi *nwi_rest) NewUserToken(w http.ResponseWriter, r *http.Request) {
+func (nwi *nwiRest) NewUserToken(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPut {
 		token, err := nwi.handler.UserTokenRequested(nwi)
 		if err != nil {
@@ -91,7 +112,7 @@ func (nwi *nwi_rest) NewUserToken(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (nwi nwi_rest) Listen() error {
+func (nwi nwiRest) Listen() error {
 	var e error
 	e = nil
 	defer func() {
@@ -109,16 +130,16 @@ func (nwi nwi_rest) Listen() error {
 	return e
 }
 
-func (nwi nwi_rest) Close() {
+func (nwi nwiRest) Close() {
 	// TODO implement
 }
 
-func (nwi *nwi_rest) SetHandler(h NetworkRequestHandler) {
+func (nwi *nwiRest) SetHandler(h NetworkRequestHandler) {
 	nwi.handler = h
 }
 
-func nwi_create_rest(iface string) NetworkingInterface {
-	nwi := &nwi_rest{iface: iface}
+func createRestInterface(iface string) NetworkingInterface {
+	nwi := &nwiRest{iface: iface}
 
 	http.HandleFunc("/user/", nwi.HandleUser)
 

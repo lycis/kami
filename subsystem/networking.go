@@ -34,19 +34,27 @@ type NetworkRequestHandler interface {
 	// UserInputProvided is called when new input from the user that
 	// is identified by the token is available for processing
 	UserInputProvided(nwi NetworkingInterface, token, input string) error
+
+	// InvalidateUserToken will be called when the client wants to invalidate
+	// a user token (e.g. a log off ocurred) or the user terminated the
+	// connection.
+	InvalidateUserToken(nwi NetworkingInterface, token string) error
 }
 
 const (
-	NWI_REST = 0
-	NWI_TCP  = 1
+	// NWI_REST is the switch for a REST networking interface
+	InterfaceREST = 0
+
+	// NWI_TCP is the marker for using the raw tcp protocol
+	InterfaceTCP  = 1
 )
 
 // CreateNetworkingInterface provides a new and prepared networking interface for a
 // given type on the given address and port
 func CreateNetworkingInterface(kind int, listenAddress string, port int) NetworkingInterface {
 	switch kind {
-	case NWI_REST:
-		return nwi_create_rest(fmt.Sprintf("%s:%d", listenAddress, port))
+	case InterfaceREST:
+		return createRestInterface(fmt.Sprintf("%s:%d", listenAddress, port))
 	default:
 		panic(fmt.Errorf("unsupported networking interface type: %d", kind))
 	}
