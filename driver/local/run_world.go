@@ -36,9 +36,7 @@ func (driver *Driver) heartbeat() {
 		driver.Log.WithField("path", path).Debug("Calling heartbeat for instance shard.")
 		hbWg.Add(len(instances))
 		go driver.doHeartbeatForShard(instances, &hbWg)
-		//driver.Log.Debug("Waiting for heartbeat to be executed.")
 		hbWg.Wait()
-		//driver.Log.Debug("Heartbeat processed.")
 	}
 
 	driver.lastHeartbeat = time.Now()
@@ -46,7 +44,6 @@ func (driver *Driver) heartbeat() {
 
 func (driver *Driver) doHeartbeatForShard(instances []*entity.Entity, hbWg *sync.WaitGroup) {
 	for _, e := range instances {
-		//driver.Log.WithField("uuid", e.GetProp("$uuid")).Debug("Calling Heartbeat")
 		go func() {
 			defer hbWg.Done()
 			if err := e.Heartbeat(); err != nil {

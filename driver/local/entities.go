@@ -1,6 +1,7 @@
 package local
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"gitlab.com/lycis/kami/entity"
 	"gitlab.com/lycis/kami/privilege"
@@ -71,6 +72,8 @@ func (driver *Driver) registerEntity(e *entity.Entity) {
 	id := e.GetProp(entity.P_SYS_ID).(string)
 	path := e.GetProp(entity.P_SYS_PATH).(string)
 
+	e.SetProp(entity.P_SYS_ACTIVE, true)
+
 	driver.activeEntities[id] = e
 
 	if driver.entityInstances[path] == nil {
@@ -83,4 +86,27 @@ func (driver *Driver) registerEntity(e *entity.Entity) {
 	} else {
 		driver.Log.WithFields(log.Fields{"uuid": id, "path": path}).Info("Entity instance spawned.")
 	}
+}
+
+// RemoveEntity calls $destroy on an entity and will delete it afterwards
+func (driver *Driver) RemoveEntity(id string) error {
+	driver.entityListMutex.Lock()
+    defer driver.entityListMutex.Unlock()
+
+	e, ok := driver.activeEntities[id]
+	if !ok {
+		return fmt.Errorf("entity not found")
+	}
+
+	if e.HasFunction("$destroy") {
+	    if _, err := e.Call("$destroy"); err != nil {
+		    return err
+	    }
+	}
+
+	e.SetProp(entity.P_SYS_ACTIVE, false)
+
+	delete(driver.activeEntities, id)
+	driver.Log.WithFields(log.Fields{"id": e.GetProp(entity.P_SYS_ID), "active": e.GetProp(entity.P_SYS_ACTIVE)}).Info("Entity removed.")
+	return nil
 }

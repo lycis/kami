@@ -55,7 +55,13 @@ func (e *Entity) Create(script script_context_api) error {
 	return err
 }
 
+// Heartbeat will take care that the $tick function is called whenever a heartbeat of the
+// driver occurs
 func (e *Entity) Heartbeat() error {
+	if !e.IsActive() {
+		return nil
+	}
+
 	defer e.scriptMutex.Unlock()
 	e.scriptMutex.Lock()
 
@@ -83,6 +89,10 @@ func (e *Entity) Heartbeat() error {
 }
 
 func (e *Entity) OnShutdown(reason string) {
+	if !e.IsActive() {
+		return
+	}
+
 	defer e.scriptMutex.Unlock()
 	e.scriptMutex.Lock()
 
@@ -101,7 +111,30 @@ func (e *Entity) OnShutdown(reason string) {
 	}
 }
 
+// HasFunction returns true if a function of the given name is defined
+// or will return false otherwise. This can be used to check if an entity
+// has a function that you wish to call
+func (e Entity) HasFunction(funName string) bool {
+	defer e.scriptMutex.Unlock()
+	e.scriptMutex.Lock()
+
+	f, err := e.script.GetFunction(funName)
+	if err != nil {
+		return false
+	}
+
+	if f.IsDefined() {
+		return true
+	}
+
+	return false
+}
+
 func (e *Entity) Call(funName string, args ...interface{}) (otto.Value, error) {
+	if !e.IsActive() {
+		return otto.UndefinedValue(), fmt.Errorf("function called on an inactive entity")
+	}
+
 	defer e.scriptMutex.Unlock()
 	e.scriptMutex.Lock()
 	return e.script.Call(funName, e, args...)
@@ -118,6 +151,19 @@ func (e Entity) GetScriptPrivilegeLevel() privilege.Level {
 
 	return e.script.PrivilegeLevel()
 }
+
 func (e *Entity) GetScriptReferenceEntity() *Entity {
 	return e
+}
+
+// IsActive indicates if the entity is still active or not. Inactive entities
+// are considered to be already destroyed or not-yet set up correctly and
+// must not be accessed in any way.
+func (e Entity) IsActive() bool {
+	b, ok := e.GetProp(P_SYS_ACTIVE).(bool)
+	if !ok {
+		return false
+	}
+
+	return b
 }

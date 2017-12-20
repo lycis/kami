@@ -9,4 +9,5 @@ func init() {
 	script.ExposeFunction("shutdown", create_shutdown)
 	script.ExposeFunction("enable_subsystem", create_enable_subsystem)
 	script.ExposeFunction("disable_subsystem", create_disable_subsystem)
+	script.ExposeFunction("destroy", createDfunDestroy)
 }

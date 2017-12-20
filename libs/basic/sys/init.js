@@ -1,5 +1,5 @@
 log("INFO", "Booting kernel...");
-spawn("/entities/dummy.js");
+var dummy = spawn("/entities/dummy.js");
 
 set_driver_hook(2, newUserToken);
 set_driver_hook(3, processUserInput);
@@ -10,6 +10,13 @@ if(enable !== true) {
 } else {
 	log("INFO", "REST interface started: "+ enable);
 }
+
+destroy(dummy.GetProp("$uuid"));
+log("INFO", ""+dummy.GetProp("$active"));
+if(dummy.IsActive()) {
+    log("FATAL", "destroyed entity is still active");
+}
+dummy.GetProp("foo");
 
 function newUserToken() {
 	log("DEBUG", "new user token was requested. spawning entity");
@@ -26,7 +33,7 @@ function invalidateToken(token) {
         return false;
     }
 
-    // TODO destroy entity
+    destroy(shell.GetProp("$uuid"));
     call_other(token, "SetProp", "disabled", true);
 }
 

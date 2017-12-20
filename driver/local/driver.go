@@ -237,7 +237,7 @@ func (d *Driver) InvalidateUserToken(nwi subsystem.NetworkingInterface, token st
 	}
 
 	if !success {
-		return fmt.Errorf("H_USER_DELETE failed. See driver log for details.")
+		return fmt.Errorf("H_USER_DELETE failed. See driver log for details")
 	}
 
 	return nil

@@ -1,0 +1,12 @@
+SYNOPSIS
+    destroy(id: string)
+
+DESCRIPTION
+    destroy is used to deactivate an entity. By calling it with a valid
+    entity UUID it will cause the driver to make sure that the entity is
+    no longer available.
+
+    However this does not implicitly mean that the entity is deleted and
+    its memory is freed right away. The driver has the liberty to only
+    disable it and wait until the next cache cleanup interval to free
+    all associated memories.

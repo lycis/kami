@@ -30,4 +30,9 @@ type DriverAPI interface {
 
 	// Enable or disable a driver subsystem
 	SetSubsystemState(stype int64, status bool) error
+
+	// RemoveEntity will take care that entities are set inactive. They
+	// are not necessarily deleted right away but must not be accessible
+	// after calling this function
+	RemoveEntity(id string) error
 }
