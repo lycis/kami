@@ -72,8 +72,6 @@ func (driver *Driver) registerEntity(e *entity.Entity) {
 	id := e.GetProp(entity.P_SYS_ID).(string)
 	path := e.GetProp(entity.P_SYS_PATH).(string)
 
-	e.SetProp(entity.P_SYS_ACTIVE, true)
-
 	driver.activeEntities[id] = e
 
 	if driver.entityInstances[path] == nil {
@@ -104,9 +102,8 @@ func (driver *Driver) RemoveEntity(id string) error {
 	    }
 	}
 
-	e.SetProp(entity.P_SYS_ACTIVE, false)
-
 	delete(driver.activeEntities, id)
 	driver.Log.WithFields(log.Fields{"id": e.GetProp(entity.P_SYS_ID), "active": e.GetProp(entity.P_SYS_ACTIVE)}).Info("Entity removed.")
+	e.SetProp(entity.P_SYS_ACTIVE, false)
 	return nil
 }

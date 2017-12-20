@@ -43,6 +43,8 @@ func NewEntity() *Entity {
 		properties: make(map[string]interface{}),
 	}
 
+	e.properties[P_SYS_ACTIVE] = true
+
 	return e
 }
 

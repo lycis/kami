@@ -11,12 +11,12 @@ if(enable !== true) {
 	log("INFO", "REST interface started: "+ enable);
 }
 
+log("INFO", "destroying dummy with id '" + dummy.GetProp("$uuid")+"'")
 destroy(dummy.GetProp("$uuid"));
-log("INFO", ""+dummy.GetProp("$active"));
+log("INFO", "dummy destroyed")
 if(dummy.IsActive()) {
     log("FATAL", "destroyed entity is still active");
 }
-dummy.GetProp("foo");
 
 function newUserToken() {
 	log("DEBUG", "new user token was requested. spawning entity");
