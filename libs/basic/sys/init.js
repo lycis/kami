@@ -3,6 +3,7 @@ var dummy = spawn("/entities/dummy.js");
 
 set_driver_hook(2, newUserToken);
 set_driver_hook(3, processUserInput);
+set_driver_hook(4, invalidateToken);
 
 var enable = enable_subsystem(0);
 if(enable !== true) {
