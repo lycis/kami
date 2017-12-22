@@ -1,0 +1,12 @@
+package: gitlab.com/lycis/kami/frontend/telnet
+import:
+- package: github.com/Sirupsen/logrus
+  version: ~1.0.4
+- package: github.com/ogier/pflag
+  version: ~0.0.1
+- package: github.com/reiver/go-telnet
+- package: gitlab.com/lycis/kami
+  subpackages:
+  - util
+- package: gopkg.in/resty.v1
+  version: ~1.0.0

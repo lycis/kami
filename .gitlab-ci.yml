@@ -14,20 +14,32 @@ stages:
 before_script:
   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
 
-build-gatekeeper:
+build-backend:
   stage: build
   script:
-    - docker build -t $IMAGE_TAG-untested .
-    - docker push $IMAGE_TAG-untested
+    - docker build -t $CI_REGISTRY_IMAGE-backend:$CI_COMMIT_REF_NAME-untested .
+    - docker push $CI_REGISTRY_IMAGE-backend:$CI_COMMIT_REF_NAME-untested
 
-test-gatekeeper:
+test-backend:
   stage: test
   script:
     - echo TODO
 
+build-telnet-frontend:
+  stage: build
+  script:
+  - cd frontend/telnet
+  - docker build -t $CI_REGISTRY_IMAGE-frontend-telnet:$CI_COMMIT_REF_NAME-untested .
+  - docker push $CI_REGISTRY_IMAGE-frontend-telnet:$CI_COMMIT_REF_NAME-untested
+
 push-verified:
   stage: push
   script:
-    - docker pull $IMAGE_TAG-untested
-    - docker tag $IMAGE_TAG-untested $IMAGE_TAG
-    - docker push $IMAGE_TAG
+    - docker pull $CI_REGISTRY_IMAGE-backend:$CI_COMMIT_REF_NAME-untested
+    - docker pull $CI_REGISTRY_IMAGE-frontend-telnet:$CI_COMMIT_REF_NAME-untested
+
+    - docker tag $CI_REGISTRY_IMAGE-backend:$CI_COMMIT_REF_NAME-backend-untested $CI_REGISTRY_IMAGE-backend:$CI_COMMIT_REF_NAME
+    - docker tag $CI_REGISTRY_IMAGE-frontend-telnet:$CI_COMMIT_REF_NAME-untested $CI_REGISTRY_IMAGE-frontend-telnet:$CI_COMMIT_REF_NAME
+
+    - docker push $CI_REGISTRY_IMAGE-backend:$CI_COMMIT_REF_NAME
+    - docker push $CI_REGISTRY_IMAGE-frontend-telnet:$CI_COMMIT_REF_NAME
