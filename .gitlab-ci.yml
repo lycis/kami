@@ -17,8 +17,8 @@ before_script:
 build-backend:
   stage: build
   script:
-    - docker build -t $CI_REGISTRY_IMAGE-backend:$CI_COMMIT_REF_NAME-untested .
-    - docker push $CI_REGISTRY_IMAGE-backend:$CI_COMMIT_REF_NAME-untested
+    - docker build -t $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_NAME-untested .
+    - docker push $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_NAME-untested
 
 test-backend:
   stage: test
@@ -29,17 +29,17 @@ build-telnet-frontend:
   stage: build
   script:
   - cd frontend/telnet
-  - docker build -t $CI_REGISTRY_IMAGE-frontend-telnet:$CI_COMMIT_REF_NAME-untested .
-  - docker push $CI_REGISTRY_IMAGE-frontend-telnet:$CI_COMMIT_REF_NAME-untested
+  - docker build -t $CI_REGISTRY_IMAGE/frontend/telnet:$CI_COMMIT_REF_NAME-untested .
+  - docker push $CI_REGISTRY_IMAGE/frontend/telnet:$CI_COMMIT_REF_NAME-untested
 
 push-verified:
   stage: push
   script:
-    - docker pull $CI_REGISTRY_IMAGE-backend:$CI_COMMIT_REF_NAME-untested
-    - docker pull $CI_REGISTRY_IMAGE-frontend-telnet:$CI_COMMIT_REF_NAME-untested
+    - docker pull $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_NAME-untested
+    - docker pull $CI_REGISTRY_IMAGE/frontend/telnet:$CI_COMMIT_REF_NAME-untested
 
-    - docker tag $CI_REGISTRY_IMAGE-backend:$CI_COMMIT_REF_NAME-backend-untested $CI_REGISTRY_IMAGE-backend:$CI_COMMIT_REF_NAME
-    - docker tag $CI_REGISTRY_IMAGE-frontend-telnet:$CI_COMMIT_REF_NAME-untested $CI_REGISTRY_IMAGE-frontend-telnet:$CI_COMMIT_REF_NAME
+    - docker tag $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_NAME-backend-untested $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_NAME
+    - docker tag $CI_REGISTRY_IMAGE/frontend/telnet:$CI_COMMIT_REF_NAME-untested $CI_REGISTRY_IMAGE/frontend/telnet:$CI_COMMIT_REF_NAME
 
-    - docker push $CI_REGISTRY_IMAGE-backend:$CI_COMMIT_REF_NAME
-    - docker push $CI_REGISTRY_IMAGE-frontend-telnet:$CI_COMMIT_REF_NAME
+    - docker push $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_NAME
+    - docker push $CI_REGISTRY_IMAGE/frontend/telnet:$CI_COMMIT_REF_NAME
