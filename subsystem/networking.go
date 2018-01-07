@@ -19,6 +19,10 @@ type NetworkingInterface interface {
 	// defines the handler that will take care of
 	// incoming request
 	SetHandler(handler NetworkRequestHandler)
+
+	// RouteEvent will pass an event to the frontend that
+	// registered for events of the given token.
+	RouteEvent(token string, payload []byte) error
 }
 
 // A NetworkRequestHandler is the interface between
@@ -39,6 +43,10 @@ type NetworkRequestHandler interface {
 	// a user token (e.g. a log off ocurred) or the user terminated the
 	// connection.
 	InvalidateUserToken(nwi NetworkingInterface, token string) error
+
+	// IsValidToken has to return 'true' if the given token is valid and equals
+	// to a still active token that was previously created.
+	IsValidToken(token string) bool
 }
 
 const (

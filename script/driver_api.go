@@ -35,4 +35,8 @@ type DriverAPI interface {
 	// are not necessarily deleted right away but must not be accessible
 	// after calling this function
 	RemoveEntity(id string) error
+
+	// QueueUserEvent is supposed to distribute an event to a user. The
+	// payload will be handed unparsed to the given uid.
+	QueueUserEvent(token, payload string) error
 }

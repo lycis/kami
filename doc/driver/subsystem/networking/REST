@@ -46,7 +46,7 @@ DESCRIPTION
             called like
                 H_USER_DELETE(:token)
 
-    /user/:token/callback/:callback/
+    /user/:token/callback/
         (see CALLBACK section for details)
 
         Method: GET

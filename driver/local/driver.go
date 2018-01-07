@@ -270,7 +270,7 @@ func (d *Driver) UserInputProvided(nwi subsystem.NetworkingInterface, token, inp
 	return nil
 }
 
-func (d Driver) getHookFuncCallable(hook int64) (otto.Value, error) {
+func (d *Driver) getHookFuncCallable(hook int64) (otto.Value, error) {
 	hv, ok := d.hooks[hook]
 	if !ok {
 		return otto.UndefinedValue(), fmt.Errorf("driver hook %d not set", hook)
@@ -281,4 +281,19 @@ func (d Driver) getHookFuncCallable(hook int64) (otto.Value, error) {
 	}
 
 	return hv, nil
+}
+
+// QueueUserEvent publishes an event to a user that is connected via networking interface
+func (d *Driver) QueueUserEvent(token, payload string) error {
+	if d.restInterface == nil {
+		return fmt.Errorf("no networking interface connected")
+	}
+
+	return d.restInterface.RouteEvent(token, []byte(payload))
+}
+
+// IsValidToken satisfies the NetworkRequestHandler interface and will check if
+// there is an entity that has the token as valid id.
+func (d *Driver) IsValidToken(token string) bool {
+	return d.GetEntityById(token) != nil
 }
