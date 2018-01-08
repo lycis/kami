@@ -38,7 +38,7 @@ push-verified:
     - docker pull $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_NAME-untested
     - docker pull $CI_REGISTRY_IMAGE/frontend/telnet:$CI_COMMIT_REF_NAME-untested
 
-    - docker tag $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_NAME-backend-untested $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_NAME
+    - docker tag $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_NAME-untested $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_NAME
     - docker tag $CI_REGISTRY_IMAGE/frontend/telnet:$CI_COMMIT_REF_NAME-untested $CI_REGISTRY_IMAGE/frontend/telnet:$CI_COMMIT_REF_NAME
 
     - docker push $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_REF_NAME
